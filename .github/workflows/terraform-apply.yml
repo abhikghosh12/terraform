@@ -43,8 +43,3 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve tfplan
 
-    - name: Upload Terraform Plan
-      uses: actions/upload-artifact@v2
-      with:
-        name: tfplan
-        path: tfplan
