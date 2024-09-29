@@ -27,20 +27,7 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-central-1  # Frankfurt region
-
-    - name: Create S3 Backend Bucket
-      run: |
-        aws s3api create-bucket \
-          --bucket voice-app \
-          --region eu-central-1 \
-          --create-bucket-configuration LocationConstraint=eu-central-1
-        aws s3api put-bucket-versioning \
-          --bucket voice-app \
-          --versioning-configuration Status=Enabled
-        aws s3api put-bucket-encryption \
-          --bucket voice-app \
-          --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
-
+        
     - name: Terraform Init
       run: terraform init -reconfigure
 
