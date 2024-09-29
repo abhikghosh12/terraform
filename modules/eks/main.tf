@@ -1,57 +1,90 @@
 # modules/eks/main.tf
 
-module "iam" {
-  source       = "../iam"
-  cluster_name = var.cluster_name
-}
-
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
-  role_arn = module.iam.cluster_role_arn
-  version  = var.kubernetes_version
+  role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
-    subnet_ids              = var.subnet_ids
-    endpoint_private_access = true
-    endpoint_public_access  = true
+    subnet_ids = var.subnet_ids
   }
 
-  tags = merge(
-    {
-      "Name" = var.cluster_name
-    },
-    var.tags
-  )
-
   depends_on = [
-    module.iam
+    aws_iam_role_policy_attachment.eks_cluster_policy,
+    aws_iam_role_policy_attachment.eks_vpc_resource_controller,
   ]
 }
 
-resource "aws_eks_node_group" "main" {
-  cluster_name    = aws_eks_cluster.main.name
-  node_group_name = var.node_group_name
-  node_role_arn   = module.iam.node_role_arn
-  subnet_ids      = var.subnet_ids
+resource "aws_eks_fargate_profile" "main" {
+  cluster_name           = aws_eks_cluster.main.name
+  fargate_profile_name   = "voice-app-fargate-profile"
+  pod_execution_role_arn = aws_iam_role.fargate_pod_execution_role.arn
+  subnet_ids             = var.fargate_subnet_ids
 
-  scaling_config {
-    desired_size = var.desired_size
-    max_size     = var.max_size
-    min_size     = var.min_size
+  selector {
+    namespace = "voice-app"
   }
+}
 
-  instance_types = var.instance_types
+resource "aws_eks_fargate_profile" "kube_system" {
+  cluster_name           = aws_eks_cluster.main.name
+  fargate_profile_name   = "kube-system-fargate-profile"
+  pod_execution_role_arn = aws_iam_role.fargate_pod_execution_role.arn
+  subnet_ids             = var.fargate_subnet_ids
 
-  tags = merge(
-    {
-      "Name" = var.node_group_name
-    },
-    var.tags
-  )
+  selector {
+    namespace = "kube-system"
+  }
+}
 
-  depends_on = [
-    module.iam
-  ]
+# IAM roles and policies for EKS cluster and Fargate profile
+
+resource "aws_iam_role" "eks_cluster" {
+  name = "${var.cluster_name}-eks-cluster-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.eks_cluster.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_vpc_resource_controller" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  role       = aws_iam_role.eks_cluster.name
+}
+
+resource "aws_iam_role" "fargate_pod_execution_role" {
+  name = "${var.cluster_name}-eks-fargate-pod-execution-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "eks-fargate-pods.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "fargate_pod_execution_role_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+  role       = aws_iam_role.fargate_pod_execution_role.name
 }
 
 output "cluster_name" {

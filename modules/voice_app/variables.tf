@@ -57,3 +57,7 @@ variable "cluster_name" {
 
 
 # Add more variables as needed for your Voice app configuration
+variable "subnet_ids" {
+  description = "List of subnet IDs for the Voice app"
+  type        = list(string)
+}
