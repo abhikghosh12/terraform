@@ -1,12 +1,23 @@
 # modules/vpc/main.tf
 
 resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
     Name        = "${var.environment}-vpc"
+    Environment = var.environment
+  }
+}
+
+
+resource "aws_eip" "nat" {
+  count  = var.az_count
+  domain = "vpc"
+
+  tags = {
+    Name        = "${var.environment}-eip-${count.index + 1}"
     Environment = var.environment
   }
 }
@@ -55,14 +66,6 @@ resource "aws_nat_gateway" "main" {
   }
 }
 
-resource "aws_eip" "nat" {
-  count = var.az_count  # Assuming you're creating one EIP per AZ
-
-  tags = {
-    Name        = "${var.environment}-eip-${count.index + 1}"
-    Environment = var.environment
-  }
-}
 resource "aws_route_table" "private" {
   count  = 3
   vpc_id = aws_vpc.main.id

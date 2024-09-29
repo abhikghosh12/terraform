@@ -5,6 +5,7 @@ module "vpc" {
   region      = var.aws_region
   environment = var.environment
   az_count    = var.az_count
+  vpc_cidr    = var.vpc_cidr
 }
 
 module "eks" {
