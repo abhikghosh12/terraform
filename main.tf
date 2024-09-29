@@ -1,54 +1,4 @@
 # main.tf
-
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
-    }
-  }
-  backend "s3" {
-    bucket = "your-terraform-state-bucket"
-    key    = "voice-app/terraform.tfstate"
-    region = "eu-central-1"
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
-data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_name
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_name
-}
-
-provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
-  }
-}
-
 module "vpc" {
   source = "./modules/vpc"
   region = var.aws_region
@@ -72,17 +22,27 @@ module "eks" {
 }
 
 module "voice_app" {
-  source        = "./modules/voice_app"
-  release_name  = var.release_name
-  chart_version = var.chart_version
-  namespace     = var.namespace
-  values_file   = var.values_file
-  replica_count = var.replica_count
-  cluster_name  = module.eks.cluster_name
+  source               = "./modules/voice_app"
+  release_name         = var.release_name
+  chart_path           = var.chart_path
+  chart_version        = var.chart_version
+  namespace            = var.namespace
+  webapp_image_tag     = var.webapp_image_tag
+  worker_image_tag     = var.worker_image_tag
+  webapp_replica_count = var.webapp_replica_count
+  worker_replica_count = var.worker_replica_count
+  ingress_enabled      = var.ingress_enabled
+  ingress_host         = var.ingress_host
+  cluster_name         = module.eks.cluster_name
 }
 
 module "external_dns" {
   source       = "./modules/external_dns"
   cluster_name = module.eks.cluster_name
   domain_name  = var.domain_name
+}
+
+module "s3_backend" {
+  source      = "./modules/s3_backend"
+  bucket_name = "voice app"
 }

@@ -1,9 +1,10 @@
 # variables.tf
 
+# Existing variables
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "eu-central-1"
 }
 
 variable "environment" {
@@ -29,7 +30,6 @@ variable "instance_types" {
   type        = list(string)
   default     = ["t3.medium"]
 }
-
 
 variable "desired_size" {
   description = "Desired number of worker nodes"
@@ -67,22 +67,16 @@ variable "chart_version" {
   default     = "1.0.0"
 }
 
-variable "values_file" {
-  description = "Path to the Helm values file"
-  type        = string
-  default     = "voice-app-values.yaml"
-}
-
 variable "domain_name" {
   description = "Domain name for external DNS"
   type        = string
   default     = "voice.example.com"
-}  
+}
 
 variable "kubernetes_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
-  default     = "1.24"  # You can set a default version or remove this line to require explicit setting
+  default     = "1.24"
 }
 
 variable "tags" {
@@ -91,8 +85,45 @@ variable "tags" {
   default     = {}
 }
 
-variable "replica_count" {
-  description = "Number of replicas for the Voice app"
+# New variables
+variable "webapp_image_tag" {
+  description = "Docker image tag for the webapp"
+  type        = string
+  default     = "webapp-v1.0.3"
+}
+
+variable "worker_image_tag" {
+  description = "Docker image tag for the worker"
+  type        = string
+  default     = "worker-v1.0.3"
+}
+
+variable "webapp_replica_count" {
+  description = "Number of replicas for the webapp"
   type        = number
   default     = 1
+}
+
+variable "worker_replica_count" {
+  description = "Number of replicas for the worker"
+  type        = number
+  default     = 1
+}
+
+variable "ingress_enabled" {
+  description = "Enable ingress"
+  type        = bool
+  default     = true
+}
+
+variable "ingress_host" {
+  description = "Ingress host"
+  type        = string
+  default     = "voice.app.com"
+}
+
+variable "chart_path" {
+  description = "Path to the Helm chart"
+  type        = string
+  default     = "./voice/helm/voice"
 }

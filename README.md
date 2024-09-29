@@ -67,7 +67,7 @@ This repository contains Terraform configuration to deploy the Voice app on AWS 
 
 7. After successful application, configure `kubectl` to interact with your new EKS cluster:
    ```
-   aws eks --region us-west-2 update-kubeconfig --name voice-app-cluster
+   aws eks --region eu-central-1 update-kubeconfig --name voice-app-cluster
    ```
 
 ## CI/CD
