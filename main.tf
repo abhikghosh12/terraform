@@ -44,5 +44,5 @@ module "external_dns" {
 
 module "s3_backend" {
   source      = "./modules/s3_backend"
-  bucket_name = "voice app"
+  bucket_name = "voice-app"
 }

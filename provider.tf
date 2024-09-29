@@ -15,7 +15,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "voice app"
+    bucket = "voice-app"
     key    = "voice-app/terraform.tfstate"
     region = "eu-central-1"
   }

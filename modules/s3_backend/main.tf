@@ -1,7 +1,10 @@
 # modules/s3_backend/main.tf
+provider "aws" {
+  region = "eu-central-1"
+}
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.bucket_name
+  bucket = "voice-app"
 
   lifecycle {
     prevent_destroy = true

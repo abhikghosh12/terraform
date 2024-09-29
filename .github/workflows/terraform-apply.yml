@@ -28,8 +28,26 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-central-1  # Frankfurt region
 
-    - name: Terraform Init
-      run: terraform init
+    - name: Create S3 Backend Bucket
+      run: |
+        cat <<EOF > backend_setup.tf
+        provider "aws" {
+          region = "eu-central-1"
+        }
+        module "s3_backend" {
+          source      = "./modules/s3"
+          bucket_name = "voice-app"
+          versioning  = true
+          # Add any other necessary variables for your S3 module
+        }
+        EOF
+        terraform init
+        terraform apply -auto-approve -target=module.s3_backend
+
+    - name: Terraform Init Main Configuration
+      run: |
+        rm backend_setup.tf
+        terraform init -reconfigure
 
     - name: Terraform Format
       run: terraform fmt -check
