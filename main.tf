@@ -73,11 +73,12 @@ module "eks" {
 
 module "voice_app" {
   source        = "./modules/voice_app"
-  cluster_name  = module.eks.cluster_name
-  namespace     = var.namespace
   release_name  = var.release_name
   chart_version = var.chart_version
+  namespace     = var.namespace
   values_file   = var.values_file
+  replica_count = var.replica_count
+  cluster_name  = module.eks.cluster_name
 }
 
 module "external_dns" {

@@ -90,3 +90,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "replica_count" {
+  description = "Number of replicas for the Voice app"
+  type        = number
+  default     = 1
+}

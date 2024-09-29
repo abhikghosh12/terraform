@@ -15,10 +15,19 @@ variable "namespace" {
   type        = string
 }
 
+variable "values_file" {
+  description = "Path to the values file for the Helm chart"
+  type        = string
+}
+
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
+
 variable "replica_count" {
   description = "Number of replicas for the Voice app"
   type        = number
   default     = 1
 }
-
 # Add more variables as needed for your Voice app configuration

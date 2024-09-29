@@ -16,7 +16,11 @@ resource "helm_release" "voice_app" {
     name  = "replicaCount"
     value = var.replica_count
   }
-
+  
+  set {
+    name  = "clusterName"
+    value = var.cluster_name
+  }
   # Add more 'set' blocks for other values you want to override
 
   depends_on = [
