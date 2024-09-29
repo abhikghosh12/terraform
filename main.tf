@@ -4,6 +4,7 @@ module "vpc" {
   source      = "./modules/vpc"
   region      = var.aws_region
   environment = var.environment
+  az_count    = var.az_count
 }
 
 module "eks" {
@@ -43,5 +44,5 @@ module "external_dns" {
 
 module "s3_backend" {
   source      = "./modules/s3_backend"
-  bucket_name = "voiceapp"
+  bucket_name = var.tf_state_bucket_name
 }

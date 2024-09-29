@@ -1,6 +1,5 @@
 # variables.tf
 
-# Existing variables
 variable "aws_region" {
   description = "AWS region"
   type        = string
@@ -11,6 +10,12 @@ variable "environment" {
   description = "Environment name"
   type        = string
   default     = "production"
+}
+
+variable "az_count" {
+  description = "Number of AZs to use"
+  type        = number
+  default     = 3
 }
 
 variable "cluster_name" {
@@ -49,30 +54,6 @@ variable "max_size" {
   default     = 5
 }
 
-variable "namespace" {
-  description = "Kubernetes namespace for the Voice app"
-  type        = string
-  default     = "voice-app"
-}
-
-variable "release_name" {
-  description = "Helm release name for the Voice app"
-  type        = string
-  default     = "voice-app"
-}
-
-variable "chart_version" {
-  description = "Helm chart version for the Voice app"
-  type        = string
-  default     = "1.0.0"
-}
-
-variable "domain_name" {
-  description = "Domain name for external DNS"
-  type        = string
-  default     = "voice.example.com"
-}
-
 variable "kubernetes_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
@@ -85,17 +66,40 @@ variable "tags" {
   default     = {}
 }
 
-# New variables
+variable "release_name" {
+  description = "Helm release name for the Voice app"
+  type        = string
+  default     = "voice-app"
+}
+
+variable "chart_path" {
+  description = "Path to the Helm chart"
+  type        = string
+  default     = "./voice/helm/voice"
+}
+
+variable "chart_version" {
+  description = "Version of the Helm chart"
+  type        = string
+  default     = "0.1.0"
+}
+
+variable "namespace" {
+  description = "Kubernetes namespace"
+  type        = string
+  default     = "voice-app"
+}
+
 variable "webapp_image_tag" {
   description = "Docker image tag for the webapp"
   type        = string
-  default     = "webapp-v1.0.3"
+  default     = "latest"
 }
 
 variable "worker_image_tag" {
   description = "Docker image tag for the worker"
   type        = string
-  default     = "worker-v1.0.3"
+  default     = "latest"
 }
 
 variable "webapp_replica_count" {
@@ -122,8 +126,14 @@ variable "ingress_host" {
   default     = "voice.app.com"
 }
 
-variable "chart_path" {
-  description = "Path to the Helm chart"
+variable "domain_name" {
+  description = "Domain name for external DNS"
   type        = string
-  default     = "./voice/helm/voice"
+  default     = "voice.example.com"
+}
+
+variable "tf_state_bucket_name" {
+  description = "Name of the S3 bucket for Terraform state"
+  type        = string
+  default     = "voiceapp-tf-state"
 }
