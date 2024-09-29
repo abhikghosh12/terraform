@@ -14,11 +14,11 @@ terraform {
       version = "~> 2.0"
     }
   }
-  # backend "s3" {
-  #   bucket = "voiceapp"
-  #   key    = "voiceapp/terraform.tfstate"
-  #   region = "eu-central-1"
-  # }
+  backend "s3" {
+    bucket = "voiceapp"
+    key    = "voiceapp/terraform.tfstate"
+    region = "eu-central-1"
+  }
 }
 
 provider "aws" {
