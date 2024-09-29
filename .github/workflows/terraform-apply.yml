@@ -30,24 +30,19 @@ jobs:
 
     - name: Create S3 Backend Bucket
       run: |
-        cat <<EOF > backend_setup.tf
-        provider "aws" {
-          region = "eu-central-1"
-        }
-        module "s3_backend" {
-          source      = "./modules/s3"
-          bucket_name = "voice-app"
-          versioning  = true
-          # Add any other necessary variables for your S3 module
-        }
-        EOF
-        terraform init
-        terraform apply -auto-approve -target=module.s3_backend
+        aws s3api create-bucket \
+          --bucket voice-app \
+          --region eu-central-1 \
+          --create-bucket-configuration LocationConstraint=eu-central-1
+        aws s3api put-bucket-versioning \
+          --bucket voice-app \
+          --versioning-configuration Status=Enabled
+        aws s3api put-bucket-encryption \
+          --bucket voice-app \
+          --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
 
-    - name: Terraform Init Main Configuration
-      run: |
-        rm backend_setup.tf
-        terraform init -reconfigure
+    - name: Terraform Init
+      run: terraform init -reconfigure
 
     - name: Terraform Format
       run: terraform fmt -check
