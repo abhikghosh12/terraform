@@ -56,16 +56,13 @@ resource "aws_nat_gateway" "main" {
 }
 
 resource "aws_eip" "nat" {
-  count = 3
-
-  domain = "vpc"
+  count = var.az_count  # Assuming you're creating one EIP per AZ
 
   tags = {
     Name        = "${var.environment}-eip-${count.index + 1}"
     Environment = var.environment
   }
 }
-
 resource "aws_route_table" "private" {
   count  = 3
   vpc_id = aws_vpc.main.id

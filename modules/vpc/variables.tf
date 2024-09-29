@@ -9,3 +9,9 @@ variable "environment" {
   description = "Environment name"
   type        = string
 }
+
+variable "az_count" {
+  description = "az count"
+  type        = number
+  default       = 1
+}
