@@ -1,9 +1,5 @@
 # main.tf
 
-provider "aws" {
-  region = var.aws_region
-}
-
 module "vpc" {
   source      = "./modules/vpc"
   vpc_cidr    = var.vpc_cidr
@@ -32,8 +28,8 @@ module "voice_app" {
   source     = "./modules/voice_app"
   name       = var.release_name
   chart      = var.chart_path
-  version    = var.chart_version
   namespace  = var.namespace
+  version    = var.chart_version
   webapp_image_tag     = var.webapp_image_tag
   webapp_replica_count = var.webapp_replica_count
   worker_image_tag     = var.worker_image_tag
