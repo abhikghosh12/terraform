@@ -1,11 +1,10 @@
 # main.tf
+
 module "vpc" {
-  source = "./modules/vpc"
-  region = var.aws_region
+  source      = "./modules/vpc"
+  region      = var.aws_region
   environment = var.environment
 }
-
-# main.tf
 
 module "eks" {
   source              = "./modules/eks"
