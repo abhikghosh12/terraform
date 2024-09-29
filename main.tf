@@ -20,6 +20,8 @@ module "eks" {
   max_size            = var.max_size
   kubernetes_version  = var.kubernetes_version
   tags                = var.tags
+
+  depends_on = [module.vpc]
 }
 
 module "voice_app" {
@@ -35,12 +37,16 @@ module "voice_app" {
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
   cluster_name         = module.eks.cluster_name
+
+  depends_on = [module.eks]
 }
 
 module "external_dns" {
   source       = "./modules/external_dns"
   cluster_name = module.eks.cluster_name
   domain_name  = var.domain_name
+
+  depends_on = [module.eks]
 }
 
 module "s3_backend" {

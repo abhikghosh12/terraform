@@ -135,7 +135,7 @@ variable "domain_name" {
 variable "tf_state_bucket_name" {
   description = "Name of the S3 bucket for Terraform state"
   type        = string
-  default     = "voiceapp-tf-state"
+  default     = "voiceapp"
 }
 
 variable "vpc_cidr" {
