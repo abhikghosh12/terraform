@@ -17,7 +17,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "voiceapp-tf-state"
+    bucket = "voiceapp"
     key    = "voiceapp/terraform.tfstate"
     region = "eu-central-1"
   }
@@ -29,12 +29,10 @@ provider "aws" {
 
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_name
-  depends_on = [module.eks]
 }
 
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
-  depends_on = [module.eks]
 }
 
 provider "kubernetes" {

@@ -11,7 +11,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-
 resource "aws_eip" "nat" {
   count  = var.az_count
   domain = "vpc"
