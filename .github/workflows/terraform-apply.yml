@@ -31,21 +31,23 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Plan
-      run: terraform plan -no-color
+    - name: Terraform Format
+      run: terraform fmt -check
 
-    - name: Manual Approval for Terraform Apply
-      uses: trstringer/manual-approval@v1
-      with:
-        secret: ${{ github.TOKEN }}
-        approvers: abhikghosh12
-        minimum-approvals: 1
-        issue-title: "Approval needed for Terraform Apply"
-        issue-body: "Please review the Terraform plan and approve if changes are acceptable."
-        exclude-workflow-initiator-as-approver: false
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      continue-on-error: true
+
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
 
     - name: Terraform Apply
-      if: env.APPROVED == 'true'
-      run: terraform apply -auto-approve
-      env:
-        APPROVED: ${{ env.APPROVED }}
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve tfplan
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v2
+      with:
+        name: tfplan
+        path: tfplan
