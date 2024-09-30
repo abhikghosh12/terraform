@@ -43,3 +43,8 @@ module "voice_app" {
 
 #   depends_on = [module.eks]
 # }
+
+output "app_url" {
+  description = "URL where the Voice App is running"
+  value       = "http://${module.voice_app.ingress_hostname}"
+}
