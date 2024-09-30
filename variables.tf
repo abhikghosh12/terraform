@@ -39,7 +39,7 @@ variable "release_name" {
 variable "chart_path" {
   description = "Path to the Helm chart"
   type        = string
-  default     = "./voice/helm/voice"
+  default     = "./charts/voice-0.1.0.tgz"
 }
 
 variable "chart_version" {

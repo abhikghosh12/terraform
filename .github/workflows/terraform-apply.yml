@@ -30,10 +30,15 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-    - name: Clone Voice App Repository
+
+    - name: Clone Voice App Repository and Package Helm Chart
       run: |
         git clone https://github.com/abhikghosh12/voice.git
-        echo "CHART_PATH=$(pwd)/voice/helm/voice" >> $GITHUB_ENV
+        cd voice/helm
+        helm package voice
+        mkdir -p $GITHUB_WORKSPACE/charts
+        mv voice-*.tgz $GITHUB_WORKSPACE/charts/
+        echo "CHART_PATH=$GITHUB_WORKSPACE/charts/voice-*.tgz" >> $GITHUB_ENV
 
     - name: Terraform Plan
       run: terraform plan -out=tfplan
