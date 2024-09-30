@@ -35,7 +35,7 @@ jobs:
     - name: Clone Voice App Repository and Package Helm Chart
       run: |
         git clone https://github.com/abhikghosh12/voice.git
-        cd voice/voice-app
+        cd voice/helm/voice
         echo "Content of Chart.yaml:"
         cat Chart.yaml
         echo "Packaging Helm chart..."
