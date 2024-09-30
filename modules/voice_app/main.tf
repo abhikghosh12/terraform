@@ -5,7 +5,7 @@ resource "helm_release" "voice_app" {
   namespace  = var.namespace
 
   values = [
-    templatefile("${path.module}/values.yaml.tpl", {
+    templatefile("${path.module}/voice_app_values.yaml", {
       webapp_image_tag     = var.webapp_image_tag
       webapp_replica_count = var.webapp_replica_count
       worker_image_tag     = var.worker_image_tag
