@@ -40,11 +40,10 @@ jobs:
         cat Chart.yaml
         echo "Packaging Helm chart..."
         helm package .
-        mkdir -p $GITHUB_WORKSPACE/charts
-        mv voice-app-*.tgz $GITHUB_WORKSPACE/charts/
-        echo "CHART_PATH=$GITHUB_WORKSPACE/charts/voice-app-*.tgz" >> $GITHUB_ENV
-        echo "Contents of charts directory:"
-        ls -R $GITHUB_WORKSPACE/charts
+        CHART_FILE=$(realpath voice-app-*.tgz)
+        echo "CHART_PATH=$CHART_FILE" >> $GITHUB_ENV
+        echo "Packaged chart location:"
+        ls -l $CHART_FILE
 
     - name: Terraform Init
       run: terraform init
@@ -56,5 +55,7 @@ jobs:
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve tfplan
+      run: |
+        echo "Using chart at: $CHART_PATH"
+        terraform apply -auto-approve -var="chart_path=$CHART_PATH" tfplan
 
