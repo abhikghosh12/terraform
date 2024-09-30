@@ -1,3 +1,4 @@
+
 # modules/vpc/main.tf
 
 resource "aws_vpc" "main" {
@@ -26,7 +27,7 @@ resource "aws_subnet" "private" {
 resource "aws_subnet" "public" {
   count             = var.az_count
   vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, var.az_count + count.index)
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + var.az_count)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
@@ -121,4 +122,6 @@ output "public_subnet_ids" {
   value = aws_subnet.public[*].id
 }
 
-
+data "aws_availability_zones" "available" {
+  state = "available"
+}

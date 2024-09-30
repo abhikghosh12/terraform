@@ -13,7 +13,7 @@ variable "environment" {
 variable "az_count" {
   description = "Number of AZs to use"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "vpc_cidr" {
