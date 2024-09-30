@@ -32,9 +32,13 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-central-1  # Change this to your desired region
 
-    - name: Package and Move Helm Chart
+    - name: Clone Voice App Repository and Package Helm Chart
       run: |
-        cd voice/helm/voice
+        git clone https://github.com/abhikghosh12/voice.git
+        cd voice/voice-app
+        echo "Content of Chart.yaml:"
+        cat Chart.yaml
+        echo "Packaging Helm chart..."
         helm package .
         mkdir -p $GITHUB_WORKSPACE/charts
         mv voice-app-*.tgz $GITHUB_WORKSPACE/charts/
