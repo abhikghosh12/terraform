@@ -21,7 +21,7 @@ variable "vpc_cidr" {
 variable "az_count" {
   description = "Number of AZs to use"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "cluster_name" {
