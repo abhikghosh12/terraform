@@ -37,11 +37,14 @@ jobs:
         cd voice/helm/voice
         echo "Content of Chart.yaml:"
         cat Chart.yaml
+        echo "Updating Helm dependencies..."
+        helm repo add stable https://charts.helm.sh/stable
+        helm dependency update .
         echo "Packaging Helm chart..."
         helm package .
         mkdir -p $GITHUB_WORKSPACE/charts
-        mv voice-*.tgz $GITHUB_WORKSPACE/charts/
-        echo "CHART_PATH=$GITHUB_WORKSPACE/charts/voice-*.tgz" >> $GITHUB_ENV
+        mv voice-app-*.tgz $GITHUB_WORKSPACE/charts/
+        echo "CHART_PATH=$GITHUB_WORKSPACE/charts/voice-app-*.tgz" >> $GITHUB_ENV
         echo "Contents of charts directory:"
         ls -R $GITHUB_WORKSPACE/charts
 
