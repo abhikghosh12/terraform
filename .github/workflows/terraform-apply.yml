@@ -2,10 +2,9 @@ name: 'Terraform CI/CD'
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   terraform:
@@ -13,34 +12,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'latest'
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.0.0
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1  # Frankfurt region
+        aws-region: eu-central-1  # Change this to your desired region
 
-    - name: Terraform Init
-      run: terraform init
-
-    - name: Clone Voice App Repository and Package Helm Chart
+    - name: Package and Move Helm Chart
       run: |
-        git clone https://github.com/abhikghosh12/voice.git
-        cd voice/helm/voice
-        echo "Content of Chart.yaml:"
-        cat Chart.yaml
-        echo "Updating Helm dependencies..."
-        helm repo add stable https://charts.helm.sh/stable
-        helm dependency update .
-        echo "Packaging Helm chart..."
+        cd voice-app
         helm package .
         mkdir -p $GITHUB_WORKSPACE/charts
         mv voice-app-*.tgz $GITHUB_WORKSPACE/charts/
@@ -48,13 +42,13 @@ jobs:
         echo "Contents of charts directory:"
         ls -R $GITHUB_WORKSPACE/charts
 
-    - name: Terraform Plan
-      run: terraform plan -out=tfplan
-      continue-on-error: true
+    - name: Terraform Init
+      run: terraform init
 
-    - name: Terraform Plan Status
-      if: steps.plan.outcome == 'failure'
-      run: exit 1
+    - name: Terraform Plan
+      run: |
+        echo "Using chart at: $CHART_PATH"
+        terraform plan -var="chart_path=$CHART_PATH" -out=tfplan
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
