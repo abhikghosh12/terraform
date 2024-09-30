@@ -34,7 +34,7 @@ jobs:
 
     - name: Package and Move Helm Chart
       run: |
-        cd voice-app
+        cd voice/helm/voice
         helm package .
         mkdir -p $GITHUB_WORKSPACE/charts
         mv voice-app-*.tgz $GITHUB_WORKSPACE/charts/
