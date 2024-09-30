@@ -39,7 +39,7 @@ variable "release_name" {
 variable "chart_path" {
   description = "Path to the Helm chart"
   type        = string
-  default     = "https://github.com/abhikghosh12/voice.git//helm/voice"
+  default     = "https://github.com/abhikghosh12/voice.git//helm/voice?ref=main"
 }
 
 variable "chart_version" {

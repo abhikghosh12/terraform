@@ -18,15 +18,9 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
-module "external_dns" {
-  source       = "./modules/external_dns"
-  cluster_name = module.eks.cluster_name
-  domain_name  = var.domain_name
-}
-
 module "voice_app" {
   source               = "./modules/voice_app"
-  cluster_name         = module.eks.cluster_name 
+  cluster_name         = module.eks.cluster_name
   release_name         = var.release_name
   chart_path           = var.chart_path
   chart_version        = var.chart_version
@@ -37,7 +31,15 @@ module "voice_app" {
   worker_replica_count = var.worker_replica_count
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
-  values_template_path = "${path.root}/templates/voice_app_values.yaml.tpl"
+  values_template_path = "${path.root}/${var.values_template_path}"
+
+  depends_on = [module.eks]
+}
+
+module "external_dns" {
+  source       = "./modules/external_dns"
+  cluster_name = module.eks.cluster_name
+  domain_name  = var.domain_name
 
   depends_on = [module.eks]
 }
