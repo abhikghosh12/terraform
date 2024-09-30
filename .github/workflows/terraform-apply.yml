@@ -34,7 +34,7 @@ jobs:
     - name: Clone Voice App Repository and Package Helm Chart
       run: |
         git clone https://github.com/abhikghosh12/voice.git
-        cd voice/helm
+        cd voice/helm/voice
         helm package voice
         mkdir -p $GITHUB_WORKSPACE/charts
         mv voice-*.tgz $GITHUB_WORKSPACE/charts/
