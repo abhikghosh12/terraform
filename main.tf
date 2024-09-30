@@ -26,6 +26,7 @@ module "external_dns" {
 
 module "voice_app" {
   source               = "./modules/voice_app"
+  cluster_name         = module.eks.cluster_name 
   release_name         = var.release_name
   chart_path           = var.chart_path
   chart_version        = var.chart_version
@@ -36,7 +37,7 @@ module "voice_app" {
   worker_replica_count = var.worker_replica_count
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
-  cluster_name         = module.eks.cluster_name
+
 
   depends_on = [module.eks]
 }
