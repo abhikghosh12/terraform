@@ -37,6 +37,7 @@ module "voice_app" {
   worker_replica_count = var.worker_replica_count
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
+  values_template_path = "${path.root}/templates/voice_app_values.yaml.tpl"
 
   depends_on = [module.eks]
 }

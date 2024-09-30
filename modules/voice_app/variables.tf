@@ -53,3 +53,10 @@ variable "ingress_host" {
   type        = string
 }
 
+# Add this new variable
+variable "values_template_path" {
+  description = "Path to the values template file"
+  type        = string
+}
+
+# ... (keep all other existing variables)

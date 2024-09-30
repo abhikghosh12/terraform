@@ -5,7 +5,7 @@ resource "helm_release" "voice_app" {
   namespace  = var.namespace
 
   values = [
-    templatefile("${path.module}/voice_app_values.yaml", {
+    templatefile(var.values_template_path, {
       webapp_image_tag     = var.webapp_image_tag
       webapp_replica_count = var.webapp_replica_count
       worker_image_tag     = var.worker_image_tag
@@ -15,5 +15,5 @@ resource "helm_release" "voice_app" {
     })
   ]
 
-  depends_on = [var.cluster_name] # This ensures the EKS cluster is created before deploying the app
+  depends_on = [var.cluster_name]
 }

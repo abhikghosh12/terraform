@@ -95,3 +95,9 @@ variable "domain_name" {
   type        = string
   default     = "app.com"
 }
+
+variable "values_template_path" {
+  description = "Path to the values template file"
+  type        = string
+  default     = "templates/voice_app_values.yaml.tpl"
+}
