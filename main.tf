@@ -38,6 +38,5 @@ module "voice_app" {
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
 
-
   depends_on = [module.eks]
 }

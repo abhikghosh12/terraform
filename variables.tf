@@ -39,13 +39,13 @@ variable "release_name" {
 variable "chart_path" {
   description = "Path to the Helm chart"
   type        = string
-  default     = "./voice/helm/voice"
+  default     = "https://github.com/abhikghosh12/voice.git//helm/voice"
 }
 
 variable "chart_version" {
-  description = "Version of the Helm chart"
+  description = "Version of the Helm chart for Voice App"
   type        = string
-  default     = "0.1.0"
+  default     = "main"  # Or specify a particular Git tag or commit hash
 }
 
 variable "namespace" {
