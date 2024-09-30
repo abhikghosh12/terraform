@@ -1,21 +1,13 @@
-resource "helm_release" "namespace" {
-  name       = "${var.namespace}-namespace"
-  repository = "https://charts.bitnami.com/bitnami"
-  chart      = "common"
-  version    = "2.4.0"  # Use the latest 1.x version
-  namespace  = var.namespace
-  create_namespace = true
-
-  set {
-    name  = "namespaceCreate"
-    value = "true"
+resource "kubernetes_namespace" "voice_app" {
+  metadata {
+    name = var.namespace
   }
 }
 
 resource "helm_release" "voice_app" {
   name       = var.release_name
   chart      = var.chart_path
-  namespace  = var.namespace
+  namespace  = kubernetes_namespace.voice_app.metadata[0].name
 
   set {
     name  = "webapp.image.tag"
@@ -49,13 +41,13 @@ resource "helm_release" "voice_app" {
 
   timeout = 900  # 15 minutes
 
-  depends_on = [helm_release.namespace]
+  depends_on = [kubernetes_namespace.voice_app]
 }
 
 data "kubernetes_ingress_v1" "voice_app" {
   metadata {
     name      = "${var.release_name}-ingress"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.voice_app.metadata[0].name
   }
 
   depends_on = [helm_release.voice_app]
