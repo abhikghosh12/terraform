@@ -57,5 +57,5 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
         echo "Using chart at: $CHART_PATH"
-        terraform apply -auto-approve -var="chart_path=$CHART_PATH" tfplan
+        terraform apply -auto-approve tfplan
 
