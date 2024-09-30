@@ -25,17 +25,18 @@ module "external_dns" {
 }
 
 module "voice_app" {
-  source     = "./modules/voice_app"
-  name       = var.release_name
-  chart      = var.chart_path
-  namespace  = var.namespace
-  version    = var.chart_version
+  source               = "./modules/voice_app"
+  release_name         = var.release_name
+  chart_path           = var.chart_path
+  chart_version        = var.chart_version
+  namespace            = var.namespace
   webapp_image_tag     = var.webapp_image_tag
-  webapp_replica_count = var.webapp_replica_count
   worker_image_tag     = var.worker_image_tag
+  webapp_replica_count = var.webapp_replica_count
   worker_replica_count = var.worker_replica_count
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
+  cluster_name         = module.eks.cluster_name
 
   depends_on = [module.eks]
 }
