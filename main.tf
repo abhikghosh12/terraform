@@ -36,10 +36,10 @@ module "voice_app" {
   depends_on = [module.eks]
 }
 
-module "external_dns" {
-  source       = "./modules/external_dns"
-  cluster_name = module.eks.cluster_name
-  domain_name  = var.domain_name
+# module "external_dns" {
+#   source       = "./modules/external_dns"
+#   cluster_name = module.eks.cluster_name
+#   domain_name  = var.domain_name
 
-  depends_on = [module.eks]
-}
+#   depends_on = [module.eks]
+# }

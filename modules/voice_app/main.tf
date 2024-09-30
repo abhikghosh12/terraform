@@ -15,7 +15,7 @@ resource "helm_release" "voice_app" {
     })
   ]
 
-  timeout = 900  # Increase timeout to 15 minutes
+  timeout = 900  # 15 minutes
 
   depends_on = [var.cluster_name]
 }
