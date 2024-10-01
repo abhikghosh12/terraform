@@ -1,0 +1,35 @@
+webapp:
+  image:
+    repository: abhikgho/text_to_speech_web_app
+    tag: web-v1.0.3
+  replicaCount: 1
+
+worker:
+  image:
+    repository: abhikgho/text_to_speech_web_app
+    tag: worker-v1.0.3
+  replicaCount: 1
+
+ingress:
+  enabled: true
+  host: voice.app.com
+
+service:
+  type: ClusterIP
+  port: 5000
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      enabled: false
+  auth:
+    enabled: false  # Disable Redis authentication
+
+persistence:
+  uploads:
+    enabled: true
+    size: 1Gi
+  output:
+    enabled: true
+    size: 1Gi
