@@ -44,10 +44,10 @@ module "eks" {
 #   depends_on = [module.eks]
 # }
 
-output "app_url" {
-  description = "URL where the Voice App is running"
-  value       = "http://${module.voice_app.ingress_hostname}"
-}
+# output "app_url" {
+#   description = "URL where the Voice App is running"
+#   value       = "http://${module.voice_app.ingress_hostname}"
+# }
 
 
 # In your main.tf file
