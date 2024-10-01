@@ -9,11 +9,10 @@ module "vpc" {
 }
 
 module "eks" {
-  source             = "./modules/eks"
-  cluster_name       = var.cluster_name
-  vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.vpc.private_subnet_ids
-  fargate_subnet_ids = module.vpc.private_subnet_ids
+  source       = "./modules/eks"
+  cluster_name = var.cluster_name
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.private_subnet_ids
 
   depends_on = [module.vpc]
 }
@@ -24,21 +23,27 @@ resource "time_sleep" "wait_for_eks" {
   create_duration = "300s"
 }
 
+resource "local_file" "kubeconfig" {
+  content  = module.eks.kubeconfig
+  filename = "${path.module}/kubeconfig_${var.cluster_name}"
+}
+
 resource "null_resource" "wait_for_cluster" {
-  depends_on = [time_sleep.wait_for_eks]
+  depends_on = [time_sleep.wait_for_eks, local_file.kubeconfig]
 
   provisioner "local-exec" {
     command = <<EOF
-      until kubectl get nodes
-      do
+      for i in {1..30}; do
+        if kubectl --kubeconfig=${local_file.kubeconfig.filename} get nodes; then
+          echo "Cluster is ready!"
+          exit 0
+        fi
         echo "Waiting for EKS cluster to be ready..."
         sleep 10
       done
+      echo "Timeout waiting for EKS cluster"
+      exit 1
     EOF
-
-    environment = {
-      KUBECONFIG = module.eks.kubeconfig
-    }
   }
 }
 
@@ -50,52 +55,13 @@ resource "kubernetes_namespace" "voice_app" {
   }
 }
 
-resource "kubernetes_config_map_v1_data" "aws_auth" {
-  depends_on = [null_resource.wait_for_cluster]
-
-  metadata {
-    name      = "aws-auth"
-    namespace = "kube-system"
-  }
-
-  data = {
-    mapRoles = <<YAML
-- rolearn: ${module.eks.fargate_pod_execution_role_arn}
-  username: system:node:{{SessionName}}
-  groups:
-    - system:bootstrappers
-    - system:nodes
-    - system:node-proxier
-YAML
-  }
-
-  force = true
-}
-
-resource "null_resource" "patch_coredns" {
-  depends_on = [kubernetes_config_map_v1_data.aws_auth]
-
-  provisioner "local-exec" {
-    command = <<EOF
-kubectl patch deployment coredns \
-  -n kube-system \
-  --type json \
-  -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'
-EOF
-
-    environment = {
-      KUBECONFIG = module.eks.kubeconfig
-    }
-  }
-}
-
 resource "helm_release" "voice_app" {
-  depends_on = [null_resource.patch_coredns, kubernetes_namespace.voice_app]
+  depends_on = [kubernetes_namespace.voice_app]
 
-  name       = var.release_name
-  chart      = "${path.module}/Charts/voice-app-0.1.0.tgz"
-  version    = var.chart_version
-  namespace  = var.namespace
+  name      = var.release_name
+  chart     = "${path.module}/Charts/voice-app-0.1.0.tgz"
+  version   = var.chart_version
+  namespace = var.namespace
 
   values = [
     file("${path.module}/voice-app-values.yaml")
