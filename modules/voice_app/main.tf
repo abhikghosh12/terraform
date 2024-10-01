@@ -84,7 +84,7 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
            storage = "1Gi"
          }
        }
-       storage_class_name = "your-storage-class-name"
+
      }
    }
 
@@ -100,7 +100,6 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
            storage = "1Gi"
          }
        }
-       storage_class_name = "your-storage-class-name"
      }
    }
 
