@@ -22,7 +22,7 @@ module "voice_app" {
   source               = "./modules/voice_app"
   cluster_name         = module.eks.cluster_name
   release_name         = var.release_name
-  chart_path           = var.chart_path
+  chart_path           = "${path.module}/Charts/voice-app-0.1.0.tgz"
   chart_version        = var.chart_version
   namespace            = var.namespace
   webapp_image_tag     = var.webapp_image_tag
