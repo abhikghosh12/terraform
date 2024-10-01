@@ -1,5 +1,7 @@
 # modules/eks/main.tf
 
+# modules/eks/main.tf
+
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
@@ -33,6 +35,12 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_iam_role_policy_attachment.eks_container_registry,
   ]
+
+  timeouts {
+    create = "60m"
+    update = "60m"
+    delete = "60m"
+  }
 }
 
 resource "aws_iam_role" "eks_cluster" {

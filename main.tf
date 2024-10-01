@@ -20,7 +20,7 @@ module "eks" {
 resource "time_sleep" "wait_for_eks" {
   depends_on = [module.eks]
 
-  create_duration = "300s"
+  create_duration = "600s"  # Increased to 10 minutes
 }
 
 resource "local_file" "kubeconfig" {
@@ -33,13 +33,13 @@ resource "null_resource" "wait_for_cluster" {
 
   provisioner "local-exec" {
     command = <<EOF
-      for i in {1..30}; do
+      for i in {1..60}; do  # Increased to 60 attempts (30 minutes)
         if kubectl --kubeconfig=${local_file.kubeconfig.filename} get nodes; then
           echo "Cluster is ready!"
           exit 0
         fi
         echo "Waiting for EKS cluster to be ready..."
-        sleep 10
+        sleep 30  # Increased sleep time to 30 seconds
       done
       echo "Timeout waiting for EKS cluster"
       exit 1

@@ -13,9 +13,17 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.7"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.1"
+    }
   }
   backend "s3" {
-    bucket = "voiceapp123"
+    bucket = "voiceapp"
     key    = "voiceapp/terraform.tfstate"
     region = "eu-central-1"
   }
@@ -23,6 +31,12 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+  
+  # Add a longer timeout for API operations
+  max_retries = 25
+  
+  # Optionally, you can add exponential backoff for retries
+  # retry_mode = "adaptive"
 }
 
 provider "kubernetes" {
@@ -46,3 +60,6 @@ provider "helm" {
     }
   }
 }
+
+provider "time" {}
+provider "local" {}
