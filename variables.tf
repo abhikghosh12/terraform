@@ -57,13 +57,13 @@ variable "namespace" {
 variable "webapp_image_tag" {
   description = "Docker image tag for the webapp"
   type        = string
-  default     = "latest"
+  default     = "web-v1.0.3"
 }
 
 variable "worker_image_tag" {
   description = "Docker image tag for the worker"
   type        = string
-  default     = "latest"
+  default     = "worker-v1.0.3"
 }
 
 variable "webapp_replica_count" {
