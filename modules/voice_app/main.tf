@@ -39,10 +39,16 @@ resource "helm_release" "voice_app" {
     value = var.ingress_host
   }
 
+  set {
+    name  = "debug"
+    value = "true"
+  }
+
   timeout = 1800  # 30 minutes
 
   depends_on = [kubernetes_namespace.voice_app]
 }
+
 
 data "kubernetes_ingress_v1" "voice_app" {
   metadata {
@@ -56,4 +62,12 @@ data "kubernetes_ingress_v1" "voice_app" {
 output "ingress_hostname" {
   description = "Hostname of the Voice App ingress"
   value       = data.kubernetes_ingress_v1.voice_app.status.0.load_balancer.0.ingress.0.hostname
+}
+
+output "helm_status" {
+  value = helm_release.voice_app.status
+}
+
+output "helm_manifest" {
+  value = helm_release.voice_app.manifest
 }
