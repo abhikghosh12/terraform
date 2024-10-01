@@ -23,7 +23,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "voiceapp"
+    bucket = "voiceapp123"
     key    = "voiceapp/terraform.tfstate"
     region = "eu-central-1"
   }
