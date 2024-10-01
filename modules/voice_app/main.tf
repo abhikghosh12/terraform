@@ -39,7 +39,7 @@ resource "helm_release" "voice_app" {
     value = var.ingress_host
   }
 
-  timeout = 1800  # 15 minutes
+  timeout = 1800  # 30 minutes
 
   depends_on = [kubernetes_namespace.voice_app]
 }
