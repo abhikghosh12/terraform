@@ -3,6 +3,7 @@
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
+  version  = "1.30"
 
   vpc_config {
     subnet_ids = var.subnet_ids
@@ -14,10 +15,52 @@ resource "aws_eks_cluster" "main" {
   ]
 }
 
-# Replace the resource with a data source
-data "aws_eks_node_group" "main" {
+# Add a null_resource to delete the existing failed node group
+resource "null_resource" "delete_failed_node_group" {
+  provisioner "local-exec" {
+    command = "aws eks delete-nodegroup --cluster-name ${var.cluster_name} --nodegroup-name ${var.cluster_name}-node-group"
+    on_failure = continue
+  }
+
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+}
+
+resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-node-group"
+  node_role_arn   = aws_iam_role.eks_node_group.arn
+  subnet_ids      = var.subnet_ids
+
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
+  }
+
+  instance_types = ["t3.medium"]
+
+  ami_type       = "AL2023_x86_64_STANDARD"
+  disk_size      = 20
+  capacity_type  = "ON_DEMAND"
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_node_group_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.eks_container_registry,
+    null_resource.delete_failed_node_group
+  ]
+
+  timeouts {
+    create = "60m"
+    update = "60m"
+    delete = "60m"
+  }
+
+  lifecycle {
+    ignore_changes = [scaling_config[0].desired_size]
+  }
 }
 
 resource "aws_iam_role" "eks_cluster" {
@@ -47,25 +90,36 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_resource_controller" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-# Use a data source to reference the existing IAM role
-data "aws_iam_role" "eks_node_group" {
+resource "aws_iam_role" "eks_node_group" {
   name = "${var.cluster_name}-eks-node-group-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
-# Keep the policy attachments, but reference the data source
 resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = data.aws_iam_role.eks_node_group.name
+  role       = aws_iam_role.eks_node_group.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = data.aws_iam_role.eks_node_group.name
+  role       = aws_iam_role.eks_node_group.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = data.aws_iam_role.eks_node_group.name
+  role       = aws_iam_role.eks_node_group.name
 }
 
 output "cluster_name" {
@@ -100,7 +154,7 @@ users:
 - name: aws
   user:
     exec:
-      apiVersion: client.authentication.k8s.io/v1alpha1
+      apiVersion: client.authentication.k8s.io/v1beta1
       command: aws
       args:
         - "eks"
@@ -110,7 +164,6 @@ users:
 KUBECONFIG
 }
 
-# Add an output for the node group ARN if needed
 output "node_group_arn" {
-  value = data.aws_eks_node_group.main.arn
+  value = aws_eks_node_group.main.arn
 }
