@@ -1,7 +1,5 @@
 # modules/eks/main.tf
 
-# modules/eks/main.tf
-
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
@@ -19,7 +17,7 @@ resource "aws_eks_cluster" "main" {
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-node-group"
-  node_role_arn   = aws_iam_role.eks_node_group.arn
+  node_role_arn   = data.aws_iam_role.eks_node_group.arn  # Changed to use data source
   subnet_ids      = var.subnet_ids
 
   scaling_config {
@@ -70,38 +68,28 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_resource_controller" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_iam_role" "eks_node_group" {
+# Use a data source to reference the existing IAM role
+data "aws_iam_role" "eks_node_group" {
   name = "${var.cluster_name}-eks-node-group-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
 }
 
+# Keep the policy attachments, but reference the data source
 resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.eks_node_group.name
+  role       = data.aws_iam_role.eks_node_group.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks_node_group.name
+  role       = data.aws_iam_role.eks_node_group.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.eks_node_group.name
+  role       = data.aws_iam_role.eks_node_group.name
 }
 
+# ... (rest of the file remains the same)
 output "cluster_name" {
   value = aws_eks_cluster.main.name
 }
