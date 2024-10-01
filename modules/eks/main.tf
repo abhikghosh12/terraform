@@ -113,3 +113,34 @@ resource "aws_eks_addon" "vpc_cni" {
 output "fargate_pod_execution_role_arn" {
   value = aws_iam_role.fargate_pod_execution_role.arn
 }
+
+# Add this at the end of the file
+output "kubeconfig" {
+  value = <<KUBECONFIG
+apiVersion: v1
+clusters:
+- cluster:
+    server: ${aws_eks_cluster.main.endpoint}
+    certificate-authority-data: ${aws_eks_cluster.main.certificate_authority[0].data}
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: aws
+  name: aws
+current-context: aws
+kind: Config
+preferences: {}
+users:
+- name: aws
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      command: aws
+      args:
+        - "eks"
+        - "get-token"
+        - "--cluster-name"
+        - "${aws_eks_cluster.main.name}"
+KUBECONFIG
+}

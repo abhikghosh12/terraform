@@ -18,8 +18,41 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
-# Update the kubernetes_config_map_v1_data resource
+resource "time_sleep" "wait_for_eks" {
+  depends_on = [module.eks]
+
+  create_duration = "300s"
+}
+
+resource "null_resource" "wait_for_cluster" {
+  depends_on = [time_sleep.wait_for_eks]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      until kubectl get nodes
+      do
+        echo "Waiting for EKS cluster to be ready..."
+        sleep 10
+      done
+    EOF
+
+    environment = {
+      KUBECONFIG = module.eks.kubeconfig
+    }
+  }
+}
+
+resource "kubernetes_namespace" "voice_app" {
+  depends_on = [null_resource.wait_for_cluster]
+
+  metadata {
+    name = var.namespace
+  }
+}
+
 resource "kubernetes_config_map_v1_data" "aws_auth" {
+  depends_on = [null_resource.wait_for_cluster]
+
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
@@ -37,30 +70,32 @@ YAML
   }
 
   force = true
-
-  depends_on = [module.eks]
 }
 
 resource "null_resource" "patch_coredns" {
-  depends_on = [module.eks]
+  depends_on = [kubernetes_config_map_v1_data.aws_auth]
 
   provisioner "local-exec" {
     command = <<EOF
-aws eks get-token --cluster-name ${module.eks.cluster_name} | kubectl apply -f - && \
 kubectl patch deployment coredns \
   -n kube-system \
   --type json \
   -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'
 EOF
+
+    environment = {
+      KUBECONFIG = module.eks.kubeconfig
+    }
   }
 }
 
 resource "helm_release" "voice_app" {
-  name             = var.release_name
-  chart            = "${path.module}/Charts/voice-app-0.1.0.tgz"
-  version          = var.chart_version
-  namespace        = var.namespace
-  create_namespace = true
+  depends_on = [null_resource.patch_coredns, kubernetes_namespace.voice_app]
+
+  name       = var.release_name
+  chart      = "${path.module}/Charts/voice-app-0.1.0.tgz"
+  version    = var.chart_version
+  namespace  = var.namespace
 
   values = [
     file("${path.module}/voice-app-values.yaml")
@@ -105,6 +140,4 @@ resource "helm_release" "voice_app" {
     name  = "persistence.output.enabled"
     value = "false"
   }
-
-  depends_on = [module.eks, kubernetes_config_map_v1_data.aws_auth]
 }
