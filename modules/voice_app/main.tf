@@ -71,3 +71,36 @@ output "helm_status" {
 output "helm_manifest" {
   value = helm_release.voice_app.manifest
 }
+
+resource "kubernetes_persistent_volume_claim" "uploads" {
+     metadata {
+       name      = "voice-app-uploads"
+       namespace = var.namespace
+     }
+     spec {
+       access_modes = ["ReadWriteMany"]
+       resources {
+         requests = {
+           storage = "1Gi"
+         }
+       }
+       storage_class_name = "your-storage-class-name"
+     }
+   }
+
+   resource "kubernetes_persistent_volume_claim" "output" {
+     metadata {
+       name      = "voice-app-output"
+       namespace = var.namespace
+     }
+     spec {
+       access_modes = ["ReadWriteMany"]
+       resources {
+         requests = {
+           storage = "1Gi"
+         }
+       }
+       storage_class_name = "your-storage-class-name"
+     }
+   }
+

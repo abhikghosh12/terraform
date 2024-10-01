@@ -93,5 +93,15 @@ resource "helm_release" "voice_app" {
     value = var.ingress_host
   }
 
+  set {
+    name  = "persistence.uploads.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "persistence.output.enabled"
+    value = "false"
+  }
+
   depends_on = [module.eks]
 }

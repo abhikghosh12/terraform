@@ -1,5 +1,4 @@
 # modules/eks/main.tf
-
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
@@ -98,3 +97,57 @@ output "cluster_endpoint" {
 output "cluster_ca_certificate" {
   value = aws_eks_cluster.main.certificate_authority[0].data
 }
+
+data "aws_eks_cluster_auth" "cluster" {
+     name = aws_eks_cluster.main.name
+   }
+
+   provider "kubernetes" {
+     host                   = aws_eks_cluster.main.endpoint
+     cluster_ca_certificate = base64decode(aws_eks_cluster.main.certificate_authority[0].data)
+     token                  = data.aws_eks_cluster_auth.cluster.token
+   }
+
+   resource "kubernetes_config_map_v1_data" "aws_auth" {
+     metadata {
+       name      = "aws-auth"
+       namespace = "kube-system"
+     }
+
+     data = {
+       mapRoles = <<YAML
+   - rolearn: ${aws_iam_role.fargate_pod_execution_role.arn}
+     username: system:node:{{SessionName}}
+     groups:
+       - system:bootstrappers
+       - system:nodes
+       - system:node-proxier
+   YAML
+     }
+
+     force = true
+
+     depends_on = [aws_eks_cluster.main]
+   }
+
+   resource "null_resource" "patch_coredns" {
+     depends_on = [aws_eks_fargate_profile.kube_system]
+
+     provisioner "local-exec" {
+       command = <<EOF
+   aws eks get-token --cluster-name ${aws_eks_cluster.main.name} | kubectl apply -f - && \
+   kubectl patch deployment coredns \
+     -n kube-system \
+     --type json \
+     -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'
+   EOF
+     }
+   }
+
+
+resource "aws_eks_addon" "vpc_cni" {
+     cluster_name = aws_eks_cluster.main.name
+     addon_name   = "vpc-cni"
+
+     resolve_conflicts = "OVERWRITE"
+   }   
