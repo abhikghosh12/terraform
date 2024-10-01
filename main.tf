@@ -18,49 +18,51 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
-# module "voice_app" {
-#   source               = "./modules/voice_app"
-#   cluster_name         = module.eks.cluster_name
-#   release_name         = var.release_name
-#   chart_path           = "${path.module}/Charts/redis-17.8.4.tgz"
-#   chart_version        = var.chart_version
-#   namespace            = var.namespace
-#   webapp_image_tag     = var.webapp_image_tag
-#   worker_image_tag     = var.worker_image_tag
-#   webapp_replica_count = var.webapp_replica_count
-#   worker_replica_count = var.worker_replica_count
-#   ingress_enabled      = var.ingress_enabled
-#   ingress_host         = var.ingress_host
-#   values_template_path = "${path.root}/${var.values_template_path}"
+resource "kubernetes_config_map_v1_data" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
 
-#   depends_on = [module.eks]
-# }
+  data = {
+    mapRoles = <<YAML
+- rolearn: ${module.eks.fargate_pod_execution_role_arn}
+  username: system:node:{{SessionName}}
+  groups:
+    - system:bootstrappers
+    - system:nodes
+    - system:node-proxier
+YAML
+  }
 
-# module "external_dns" {
-#   source       = "./modules/external_dns"
-#   cluster_name = module.eks.cluster_name
-#   domain_name  = var.domain_name
+  force = true
 
-#   depends_on = [module.eks]
-# }
+  depends_on = [module.eks]
+}
 
-# output "app_url" {
-#   description = "URL where the Voice App is running"
-#   value       = "http://${module.voice_app.ingress_hostname}"
-# }
+resource "null_resource" "patch_coredns" {
+  depends_on = [module.eks]
 
-
-# In your main.tf file
+  provisioner "local-exec" {
+    command = <<EOF
+aws eks get-token --cluster-name ${module.eks.cluster_name} | kubectl apply -f - && \
+kubectl patch deployment coredns \
+  -n kube-system \
+  --type json \
+  -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'
+EOF
+  }
+}
 
 resource "helm_release" "voice_app" {
-  name       = var.release_name
-  chart      = "${path.module}/Charts/voice-app-0.1.0.tgz"  # Adjust this path to your actual chart
-  version    = var.chart_version
-  namespace  = var.namespace
+  name             = var.release_name
+  chart            = "${path.module}/Charts/voice-app-0.1.0.tgz"
+  version          = var.chart_version
+  namespace        = var.namespace
   create_namespace = true
 
   values = [
-    file("${path.module}/voice-app-values.yaml")  # Adjust this path to your values file
+    file("${path.module}/voice-app-values.yaml")
   ]
 
   set {
@@ -103,5 +105,5 @@ resource "helm_release" "voice_app" {
     value = "false"
   }
 
-  depends_on = [module.eks]
+  depends_on = [module.eks, kubernetes_config_map_v1_data.aws_auth]
 }
