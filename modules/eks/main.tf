@@ -14,31 +14,10 @@ resource "aws_eks_cluster" "main" {
   ]
 }
 
-resource "aws_eks_node_group" "main" {
+# Replace the resource with a data source
+data "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-node-group"
-  node_role_arn   = data.aws_iam_role.eks_node_group.arn  # Changed to use data source
-  subnet_ids      = var.subnet_ids
-
-  scaling_config {
-    desired_size = 2
-    max_size     = 3
-    min_size     = 1
-  }
-
-  instance_types = ["t3.medium"]
-
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_node_group_policy,
-    aws_iam_role_policy_attachment.eks_cni_policy,
-    aws_iam_role_policy_attachment.eks_container_registry,
-  ]
-
-  timeouts {
-    create = "60m"
-    update = "60m"
-    delete = "60m"
-  }
 }
 
 resource "aws_iam_role" "eks_cluster" {
@@ -89,7 +68,6 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   role       = data.aws_iam_role.eks_node_group.name
 }
 
-# ... (rest of the file remains the same)
 output "cluster_name" {
   value = aws_eks_cluster.main.name
 }
@@ -130,4 +108,9 @@ users:
         - "--cluster-name"
         - "${aws_eks_cluster.main.name}"
 KUBECONFIG
+}
+
+# Add an output for the node group ARN if needed
+output "node_group_arn" {
+  value = data.aws_eks_node_group.main.arn
 }
