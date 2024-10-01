@@ -4,50 +4,50 @@ resource "kubernetes_namespace" "voice_app" {
   }
 }
 
-resource "helm_release" "voice_app" {
-  name       = var.release_name
-  chart      = var.chart_path
-  namespace  = kubernetes_namespace.voice_app.metadata[0].name
+# resource "helm_release" "voice_app" {
+#   name       = var.release_name
+#   chart      = var.chart_path
+#   namespace  = kubernetes_namespace.voice_app.metadata[0].name
 
-  set {
-    name  = "webapp.image.tag"
-    value = var.webapp_image_tag
-  }
+#   set {
+#     name  = "webapp.image.tag"
+#     value = var.webapp_image_tag
+#   }
 
-  set {
-    name  = "worker.image.tag"
-    value = var.worker_image_tag
-  }
+#   set {
+#     name  = "worker.image.tag"
+#     value = var.worker_image_tag
+#   }
 
-  set {
-    name  = "webapp.replicaCount"
-    value = var.webapp_replica_count
-  }
+#   set {
+#     name  = "webapp.replicaCount"
+#     value = var.webapp_replica_count
+#   }
 
-  set {
-    name  = "worker.replicaCount"
-    value = var.worker_replica_count
-  }
+#   set {
+#     name  = "worker.replicaCount"
+#     value = var.worker_replica_count
+#   }
 
-  set {
-    name  = "ingress.enabled"
-    value = var.ingress_enabled
-  }
+#   set {
+#     name  = "ingress.enabled"
+#     value = var.ingress_enabled
+#   }
 
-  set {
-    name  = "ingress.host"
-    value = var.ingress_host
-  }
+#   set {
+#     name  = "ingress.host"
+#     value = var.ingress_host
+#   }
 
-  set {
-    name  = "debug"
-    value = "true"
-  }
+#   set {
+#     name  = "debug"
+#     value = "true"
+#   }
 
-  timeout = 1800  # 30 minutes
+#   timeout = 1800  # 30 minutes
 
-  depends_on = [kubernetes_namespace.voice_app]
-}
+#   depends_on = [kubernetes_namespace.voice_app]
+# }
 
 
 data "kubernetes_ingress_v1" "voice_app" {
