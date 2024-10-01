@@ -41,7 +41,7 @@ resource "aws_eks_node_group" "main" {
 
   instance_types = ["t3.medium"]
 
-  ami_type       = "AL2023_x86_64_STANDARD"
+  ami_type       = "AL2_x86_64"  # Changed to a supported AMI type
   disk_size      = 20
   capacity_type  = "ON_DEMAND"
 
@@ -62,6 +62,8 @@ resource "aws_eks_node_group" "main" {
     ignore_changes = [scaling_config[0].desired_size]
   }
 }
+
+# ... rest of the file remains the same ...
 
 resource "aws_iam_role" "eks_cluster" {
   name = "${var.cluster_name}-eks-cluster-role"
