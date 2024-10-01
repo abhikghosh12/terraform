@@ -18,6 +18,7 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
+# Update the kubernetes_config_map_v1_data resource
 resource "kubernetes_config_map_v1_data" "aws_auth" {
   metadata {
     name      = "aws-auth"

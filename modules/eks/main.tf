@@ -107,4 +107,9 @@ resource "aws_eks_addon" "vpc_cni" {
   addon_name   = "vpc-cni"
 
   resolve_conflicts = "OVERWRITE"
-}  
+}
+
+
+output "fargate_pod_execution_role_arn" {
+  value = aws_iam_role.fargate_pod_execution_role.arn
+}
