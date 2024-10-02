@@ -47,3 +47,8 @@ jobs:
       run: |
         terraform apply -auto-approve tfplan
 
+    - name: Terraform Destroy
+      env:
+        TF_LOG: DEBUG
+      run: |
+        terraform  destroy -auto-approve tfplan
