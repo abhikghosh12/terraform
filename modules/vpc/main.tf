@@ -45,13 +45,26 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
-# Create Elastic IPs for NAT Gateways
+# Check for existing EIPs
+data "aws_eips" "existing" {
+  tags = {
+    Environment = var.environment
+    Purpose     = "NAT"
+  }
+}
+
+locals {
+  existing_eip_count = length(data.aws_eips.existing.allocation_ids)
+  eips_to_create     = min(var.az_count - local.existing_eip_count, 1)  # Create at most 1 new EIP
+}
+
+# Create new EIP only if necessary
 resource "aws_eip" "nat" {
-  count  = var.az_count
+  count  = local.eips_to_create
   domain = "vpc"
 
   tags = {
-    Name        = "${var.environment}-nat-eip-${count.index + 1}"
+    Name        = "${var.environment}-nat-eip-${local.existing_eip_count + 1}"
     Environment = var.environment
     Purpose     = "NAT"
   }
@@ -61,27 +74,31 @@ resource "aws_eip" "nat" {
   }
 }
 
+# Combine existing and new EIPs
+locals {
+  all_eip_ids = concat(data.aws_eips.existing.allocation_ids, aws_eip.nat[*].id)
+}
+
 resource "aws_nat_gateway" "main" {
-  count         = var.az_count
-  allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
+  count         = min(length(local.all_eip_ids), 1)  # Create at most 1 NAT Gateway
+  allocation_id = local.all_eip_ids[count.index]
+  subnet_id     = aws_subnet.public[0].id  # Always use the first public subnet
 
   tags = {
-    Name = "${var.environment}-nat-gw-${count.index + 1}"
+    Name = "${var.environment}-nat-gw"
   }
 }
 
 resource "aws_route_table" "private" {
-  count  = var.az_count
   vpc_id = aws_vpc.main.id
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main[count.index].id
+    nat_gateway_id = aws_nat_gateway.main[0].id
   }
 
   tags = {
-    Name = "${var.environment}-private-route-table-${count.index + 1}"
+    Name = "${var.environment}-private-route-table"
   }
 }
 
@@ -101,7 +118,7 @@ resource "aws_route_table" "public" {
 resource "aws_route_table_association" "private" {
   count          = var.az_count
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index].id
+  route_table_id = aws_route_table.private.id
 }
 
 resource "aws_route_table_association" "public" {
