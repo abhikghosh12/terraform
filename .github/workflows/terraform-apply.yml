@@ -51,4 +51,4 @@ jobs:
       env:
         TF_LOG: DEBUG
       run: |
-        terraform  destroy -auto-approve tfplan
+        terraform  destroy -auto-approve
