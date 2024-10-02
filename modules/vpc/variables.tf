@@ -1,4 +1,12 @@
-# modules/vpc/variables.tf
+terraform {
+  required_providers {
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.1.0"
+    }
+  }
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
