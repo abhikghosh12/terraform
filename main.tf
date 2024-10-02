@@ -1,11 +1,10 @@
-# main.tf
-
+# Configure the AWS Provider
 module "vpc" {
   source      = "./modules/vpc"
   vpc_cidr    = var.vpc_cidr
   az_count    = var.az_count
   environment = var.environment
-  region      = var.aws_region
+  create_nat_gateway = false  # Set to true if you want to create NAT Gateways
 }
 
 module "eks" {
