@@ -46,25 +46,27 @@ resource "aws_internet_gateway" "main" {
 }
 
 # Check for existing Elastic IPs
-data "aws_eip" "nat" {
-  count = var.az_count
-  filter {
-    name   = "tag:Name"
-    values = ["${var.environment}-nat-eip-${count.index + 1}"]
+data "aws_eips" "existing" {
+  tags = {
+    Environment = var.environment
+    Purpose     = "NAT"
   }
-  filter {
-    name   = "domain"
-    values = ["vpc"]
-  }
+}
+
+locals {
+  existing_eip_count = length(data.aws_eips.existing.ids)
+  eips_to_create     = max(var.az_count - local.existing_eip_count, 0)
 }
 
 # Create new Elastic IPs only if they don't exist
 resource "aws_eip" "nat" {
-  count = var.az_count - length(data.aws_eip.nat)
-  vpc   = true
+  count  = local.eips_to_create
+  domain = "vpc"
 
   tags = {
-    Name = "${var.environment}-nat-eip-${count.index + length(data.aws_eip.nat) + 1}"
+    Name        = "${var.environment}-nat-eip-${count.index + local.existing_eip_count + 1}"
+    Environment = var.environment
+    Purpose     = "NAT"
   }
 
   lifecycle {
@@ -74,7 +76,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "main" {
   count         = var.az_count
-  allocation_id = length(data.aws_eip.nat) > count.index ? data.aws_eip.nat[count.index].id : aws_eip.nat[count.index - length(data.aws_eip.nat)].id
+  allocation_id = element(concat(data.aws_eips.existing.ids, aws_eip.nat[*].id), count.index)
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
