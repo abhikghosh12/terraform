@@ -1,5 +1,8 @@
-
 # modules/vpc/main.tf
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -7,8 +10,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name        = "${var.environment}-vpc"
-    Environment = var.environment
+    Name = "${var.environment}-vpc"
   }
 }
 
@@ -19,20 +21,19 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name        = "${var.environment}-private-subnet-${count.index + 1}"
-    Environment = var.environment
+    Name = "${var.environment}-private-subnet-${count.index + 1}"
   }
 }
 
 resource "aws_subnet" "public" {
-  count             = var.az_count
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + var.az_count)
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+  count                   = var.az_count
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, var.az_count + count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  map_public_ip_on_launch = true
 
   tags = {
-    Name        = "${var.environment}-public-subnet-${count.index + 1}"
-    Environment = var.environment
+    Name = "${var.environment}-public-subnet-${count.index + 1}"
   }
 }
 
@@ -40,31 +41,45 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name        = "${var.environment}-igw"
-    Environment = var.environment
+    Name = "${var.environment}-igw"
   }
 }
 
-resource "aws_eip" "nat" {
+# Check for existing Elastic IPs
+data "aws_eip" "nat" {
   count = var.az_count
+  filter {
+    name   = "tag:Name"
+    values = ["${var.environment}-nat-eip-${count.index + 1}"]
+  }
+  filter {
+    name   = "domain"
+    values = ["vpc"]
+  }
+}
+
+# Create new Elastic IPs only if they don't exist
+resource "aws_eip" "nat" {
+  count = var.az_count - length(data.aws_eip.nat)
+  vpc   = true
 
   tags = {
-    Name        = "${var.environment}-eip-${count.index + 1}"
-    Environment = var.environment
+    Name = "${var.environment}-nat-eip-${count.index + length(data.aws_eip.nat) + 1}"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
 resource "aws_nat_gateway" "main" {
   count         = var.az_count
-  allocation_id = aws_eip.nat[count.index].id
+  allocation_id = length(data.aws_eip.nat) > count.index ? data.aws_eip.nat[count.index].id : aws_eip.nat[count.index - length(data.aws_eip.nat)].id
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name        = "${var.environment}-nat-${count.index + 1}"
-    Environment = var.environment
+    Name = "${var.environment}-nat-gw-${count.index + 1}"
   }
-
-  depends_on = [aws_internet_gateway.main]
 }
 
 resource "aws_route_table" "private" {
@@ -77,8 +92,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name        = "${var.environment}-private-rt-${count.index + 1}"
-    Environment = var.environment
+    Name = "${var.environment}-private-route-table-${count.index + 1}"
   }
 }
 
@@ -91,8 +105,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name        = "${var.environment}-public-rt"
-    Environment = var.environment
+    Name = "${var.environment}-public-route-table"
   }
 }
 
@@ -118,8 +131,4 @@ output "private_subnet_ids" {
 
 output "public_subnet_ids" {
   value = aws_subnet.public[*].id
-}
-
-data "aws_availability_zones" "available" {
-  state = "available"
 }

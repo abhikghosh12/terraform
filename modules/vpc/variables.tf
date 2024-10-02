@@ -1,8 +1,13 @@
 # modules/vpc/variables.tf
 
-variable "region" {
-  description = "AWS region"
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
   type        = string
+}
+
+variable "az_count" {
+  description = "Number of AZs to use"
+  type        = number
 }
 
 variable "environment" {
@@ -10,14 +15,7 @@ variable "environment" {
   type        = string
 }
 
-variable "az_count" {
-  description = "Number of AZs to use"
-  type        = number
-  default     = 2
-}
-
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
+variable "region" {
+  description = "AWS region"
   type        = string
-  default     = "10.0.0.0/16"
 }
