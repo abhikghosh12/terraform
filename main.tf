@@ -1,12 +1,12 @@
 # main.tf
 
-module "vpc" {
-  source      = "./modules/vpc"
-  vpc_cidr    = var.vpc_cidr
-  az_count    = var.az_count
-  environment = var.environment
-  region      = var.aws_region
-}
+# module "vpc" {
+#   source      = "./modules/vpc"
+#   vpc_cidr    = var.vpc_cidr
+#   az_count    = var.az_count
+#   environment = var.environment
+#   region      = var.aws_region
+# }
 
 module "eks" {
   source       = "./modules/eks"
