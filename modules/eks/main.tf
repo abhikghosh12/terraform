@@ -3,7 +3,7 @@
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
-  version  = "1.30"
+  version  = "1.31"
 
   vpc_config {
     subnet_ids = var.subnet_ids
@@ -15,7 +15,6 @@ resource "aws_eks_cluster" "main" {
   ]
 }
 
-# Add a null_resource to delete the existing failed node group
 resource "null_resource" "delete_failed_node_group" {
   provisioner "local-exec" {
     command = "aws eks delete-nodegroup --cluster-name ${var.cluster_name} --nodegroup-name ${var.cluster_name}-node-group"
@@ -27,7 +26,6 @@ resource "null_resource" "delete_failed_node_group" {
   }
 }
 
-# Use a data source for the existing IAM role
 data "aws_iam_role" "eks_node_group" {
   name = "${var.cluster_name}-eks-node-group-role"
 }
@@ -95,7 +93,6 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_resource_controller" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-# Update policy attachments to use the data source
 resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = data.aws_iam_role.eks_node_group.name
@@ -155,4 +152,8 @@ KUBECONFIG
 
 output "node_group_arn" {
   value = aws_eks_node_group.main.arn
+}
+
+output "cluster_security_group_id" {
+  value = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
 }
