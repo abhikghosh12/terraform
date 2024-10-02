@@ -1,14 +1,10 @@
-# Configure the AWS Provider
-provider "aws" {
-  region = var.aws_region
-}
 
 module "vpc" {
   source      = "./modules/vpc"
   vpc_cidr    = var.vpc_cidr
   az_count    = var.az_count
   environment = var.environment
-  create_nat_gateway = false  # Set to true if you want to create NAT Gateways
+  create_nat_gateway = true  # Set to true if you want to create NAT Gateways
 }
 
 module "eks" {
@@ -23,7 +19,7 @@ module "eks" {
 resource "time_sleep" "wait_for_eks" {
   depends_on = [module.eks]
 
-  create_duration = "900s"  # 15 minutes
+  create_duration = "1800s"  # 15 minutes
 }
 
 resource "local_file" "kubeconfig" {
