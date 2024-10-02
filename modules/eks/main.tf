@@ -1,13 +1,12 @@
 # modules/eks/main.tf# modules/eks/main.tf
 
-locals {
-  eks_cluster_role_name = "${var.cluster_name}-eks-cluster-role"
-  eks_node_group_role_name = "${var.cluster_name}-eks-node-group-role"
-}
-
 data "aws_eks_cluster" "existing" {
   name = var.cluster_name
   count = 1
+}
+locals {
+  eks_cluster_role_name = "${var.cluster_name}-eks-cluster-role"
+  eks_node_group_role_name = "${var.cluster_name}-eks-node-group-role"
 }
 
 data "aws_iam_role" "existing_cluster_role" {
