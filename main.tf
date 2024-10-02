@@ -1,62 +1,109 @@
-data "aws_availability_zones" "available" {
-  filter {
-    name   = "opt-in-status"
-    values = ["opt-in-not-required"]
-  }
-}
-
-locals {
-  cluster_name = "education-eks-${random_string.suffix.result}"
-}
-
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
-}
+# main.tf
 
 module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.8.1"
-
-  name = "education-vpc"
-
-  cidr = "10.0.0.0/16"
-  azs  = slice(data.aws_availability_zones.available.names, 0, 3)
-
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
-
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
-
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = 1
-  }
-
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = 1
-  }
+  source      = "./modules/vpc"
+  vpc_cidr    = var.vpc_cidr
+  az_count    = var.az_count
+  environment = var.environment
+  region      = var.aws_region
 }
 
 module "eks" {
   source       = "./modules/eks"
-  cluster_name = local.cluster_name
+  cluster_name = var.cluster_name
   vpc_id       = module.vpc.vpc_id
-  subnet_ids   = module.vpc.private_subnets
+  subnet_ids   = module.vpc.private_subnet_ids
+
+  depends_on = [module.vpc]
 }
 
-data "aws_iam_policy" "ebs_csi_policy" {
-  arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+resource "time_sleep" "wait_for_eks" {
+  depends_on = [module.eks]
+
+  create_duration = "900s"  # 15 minutes
 }
 
-module "irsa-ebs-csi" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version = "5.39.0"
+resource "local_file" "kubeconfig" {
+  content  = module.eks.kubeconfig
+  filename = "${path.module}/kubeconfig_${var.cluster_name}"
+}
 
-  create_role                   = true
-  role_name                     = "AmazonEKSTFEBSCSIRole-${module.eks.cluster_name}"
-  provider_url                  = module.eks.cluster_oidc_issuer_url
-  role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+resource "null_resource" "wait_for_cluster" {
+  depends_on = [time_sleep.wait_for_eks, local_file.kubeconfig]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      for i in {1..90}; do  # 45 minutes
+        if kubectl --kubeconfig=${local_file.kubeconfig.filename} get nodes; then
+          echo "Cluster is ready!"
+          exit 0
+        fi
+        echo "Waiting for EKS cluster to be ready..."
+        sleep 30
+      done
+      echo "Timeout waiting for EKS cluster"
+      exit 1
+    EOF
+  }
+}
+
+resource "kubernetes_namespace" "voice_app" {
+  depends_on = [null_resource.wait_for_cluster]
+
+  metadata {
+    name = var.namespace
+  }
+}
+
+resource "helm_release" "voice_app" {
+  depends_on = [kubernetes_namespace.voice_app]
+
+  name      = var.release_name
+  chart     = "${path.module}/Charts/voice-app-0.1.0.tgz"
+  version   = var.chart_version
+  namespace = var.namespace
+
+  values = [
+    file("${path.module}/voice-app-values.yaml")
+  ]
+
+  set {
+    name  = "webapp.image.tag"
+    value = var.webapp_image_tag
+  }
+
+  set {
+    name  = "worker.image.tag"
+    value = var.worker_image_tag
+  }
+
+  set {
+    name  = "webapp.replicaCount"
+    value = var.webapp_replica_count
+  }
+
+  set {
+    name  = "worker.replicaCount"
+    value = var.worker_replica_count
+  }
+
+  set {
+    name  = "ingress.enabled"
+    value = var.ingress_enabled
+  }
+
+  set {
+    name  = "ingress.host"
+    value = var.ingress_host
+  }
+
+  set {
+    name  = "persistence.uploads.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "persistence.output.enabled"
+    value = "false"
+  }
 }
