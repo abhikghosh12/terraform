@@ -1,5 +1,4 @@
 # modules/vpc/variables.tf
-
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
@@ -15,7 +14,8 @@ variable "environment" {
   type        = string
 }
 
-variable "region" {
-  description = "AWS region"
-  type        = string
+variable "create_nat_gateway" {
+  description = "Whether to create NAT Gateways"
+  type        = bool
+  default     = false
 }
