@@ -1,15 +1,16 @@
+
+
 output "cluster_name" {
-  value = aws_eks_cluster.main.name
+  value = length(data.aws_eks_cluster.existing) > 0 ? data.aws_eks_cluster.existing[0].name : aws_eks_cluster.main[0].name
 }
 
 output "cluster_endpoint" {
-  value = aws_eks_cluster.main.endpoint
+  value = length(data.aws_eks_cluster.existing) > 0 ? data.aws_eks_cluster.existing[0].endpoint : aws_eks_cluster.main[0].endpoint
 }
 
 output "cluster_ca_certificate" {
-  value = aws_eks_cluster.main.certificate_authority[0].data
+  value = length(data.aws_eks_cluster.existing) > 0 ? data.aws_eks_cluster.existing[0].certificate_authority[0].data : aws_eks_cluster.main[0].certificate_authority[0].data
 }
-
 output "cluster_security_group_id" {
   value = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
 }

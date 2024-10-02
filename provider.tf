@@ -23,6 +23,11 @@ terraform {
       version = "~> 0.11.0"
     }
   }
+  backend "s3" {
+    bucket = "voiceapp123"
+    key    = "voiceapp/terraform.tfstate"
+    region = "eu-central-1"
+  }  
 }
 
 provider "aws" {

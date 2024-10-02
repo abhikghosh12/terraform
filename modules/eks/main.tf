@@ -1,11 +1,27 @@
-# modules/eks/main.tf
+# modules/eks/main.tf# modules/eks/main.tf
+
 locals {
   eks_cluster_role_name = "${var.cluster_name}-eks-cluster-role"
   eks_node_group_role_name = "${var.cluster_name}-eks-node-group-role"
 }
 
-# Always create the cluster IAM role
+data "aws_eks_cluster" "existing" {
+  name = var.cluster_name
+  count = 1
+}
+
+data "aws_iam_role" "existing_cluster_role" {
+  name = local.eks_cluster_role_name
+  count = 1
+}
+
+data "aws_iam_role" "existing_node_group_role" {
+  name = local.eks_node_group_role_name
+  count = 1
+}
+
 resource "aws_iam_role" "eks_cluster" {
+  count = length(data.aws_iam_role.existing_cluster_role) > 0 ? 0 : 1
   name = local.eks_cluster_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -24,8 +40,8 @@ resource "aws_iam_role" "eks_cluster" {
   }
 }
 
-# Always create the node group IAM role
 resource "aws_iam_role" "eks_node_group" {
+  count = length(data.aws_iam_role.existing_node_group_role) > 0 ? 0 : 1
   name = local.eks_node_group_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -45,8 +61,9 @@ resource "aws_iam_role" "eks_node_group" {
 }
 
 resource "aws_eks_cluster" "main" {
+  count = length(data.aws_eks_cluster.existing) > 0 ? 0 : 1
   name     = var.cluster_name
-  role_arn = aws_iam_role.eks_cluster.arn
+  role_arn = length(data.aws_iam_role.existing_cluster_role) > 0 ? data.aws_iam_role.existing_cluster_role[0].arn : aws_iam_role.eks_cluster[0].arn
   version  = "1.31"
   vpc_config {
     subnet_ids = var.subnet_ids
@@ -55,22 +72,25 @@ resource "aws_eks_cluster" "main" {
     aws_iam_role_policy_attachment.eks_cluster_policy,
     aws_iam_role_policy_attachment.eks_vpc_resource_controller,
   ]
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.eks_cluster.name
+  role       = length(data.aws_iam_role.existing_cluster_role) > 0 ? data.aws_iam_role.existing_cluster_role[0].name : aws_iam_role.eks_cluster[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_vpc_resource_controller" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.eks_cluster.name
+  role       = length(data.aws_iam_role.existing_cluster_role) > 0 ? data.aws_iam_role.existing_cluster_role[0].name : aws_iam_role.eks_cluster[0].name
 }
 
 resource "aws_eks_node_group" "main" {
-  cluster_name    = aws_eks_cluster.main.name
+  cluster_name    = length(data.aws_eks_cluster.existing) > 0 ? data.aws_eks_cluster.existing[0].name : aws_eks_cluster.main[0].name
   node_group_name = "${var.cluster_name}-node-group"
-  node_role_arn   = aws_iam_role.eks_node_group.arn
+  node_role_arn   = length(data.aws_iam_role.existing_node_group_role) > 0 ? data.aws_iam_role.existing_node_group_role[0].arn : aws_iam_role.eks_node_group[0].arn
   subnet_ids      = var.subnet_ids
   scaling_config {
     desired_size = 2
@@ -87,18 +107,20 @@ resource "aws_eks_node_group" "main" {
 
 resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.eks_node_group.name
+  role       = length(data.aws_iam_role.existing_node_group_role) > 0 ? data.aws_iam_role.existing_node_group_role[0].name : aws_iam_role.eks_node_group[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks_node_group.name
+  role       = length(data.aws_iam_role.existing_node_group_role) > 0 ? data.aws_iam_role.existing_node_group_role[0].name : aws_iam_role.eks_node_group[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.eks_node_group.name
+  role       = length(data.aws_iam_role.existing_node_group_role) > 0 ? data.aws_iam_role.existing_node_group_role[0].name : aws_iam_role.eks_node_group[0].name
 }
+
+
 
 # ... rest of the file remains the same ...
 

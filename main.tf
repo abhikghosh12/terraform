@@ -1,4 +1,8 @@
 # Configure the AWS Provider
+provider "aws" {
+  region = var.aws_region
+}
+
 module "vpc" {
   source      = "./modules/vpc"
   vpc_cidr    = var.vpc_cidr
@@ -106,4 +110,6 @@ resource "helm_release" "voice_app" {
     value = "false"
   }
 }
+
+
 
