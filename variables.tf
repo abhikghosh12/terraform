@@ -36,16 +36,10 @@ variable "release_name" {
   default     = "voice-app"
 }
 
-variable "chart_path" {
-  description = "Path to the Helm chart"
-  type        = string
-  default     = "./charts/voice-0.1.0.tgz"
-}
-
 variable "chart_version" {
   description = "Version of the Helm chart for Voice App"
   type        = string
-  default     = "main"  # Or specify a particular Git tag or commit hash
+  default     = "0.1.0"
 }
 
 variable "namespace" {
@@ -88,16 +82,4 @@ variable "ingress_host" {
   description = "Ingress host"
   type        = string
   default     = "voice.app.com"
-}
-
-variable "domain_name" {
-  description = "Domain name for external DNS"
-  type        = string
-  default     = "app.com"
-}
-
-variable "values_template_path" {
-  description = "Path to the values template file"
-  type        = string
-  default     = "templates/voice_app_values.yaml.tpl"
 }

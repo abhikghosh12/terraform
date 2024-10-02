@@ -15,17 +15,6 @@ resource "aws_eks_cluster" "main" {
   ]
 }
 
-resource "null_resource" "delete_failed_node_group" {
-  provisioner "local-exec" {
-    command = "aws eks delete-nodegroup --cluster-name ${var.cluster_name} --nodegroup-name ${var.cluster_name}-node-group"
-    on_failure = continue
-  }
-
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-}
-
 data "aws_iam_role" "eks_node_group" {
   name = "${var.cluster_name}-eks-node-group-role"
 }
@@ -52,7 +41,6 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_node_group_policy,
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_iam_role_policy_attachment.eks_container_registry,
-    null_resource.delete_failed_node_group
   ]
 
   timeouts {
@@ -81,6 +69,10 @@ resource "aws_iam_role" "eks_cluster" {
       }
     ]
   })
+
+  lifecycle {
+    ignore_changes = [assume_role_policy]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -120,6 +112,10 @@ output "cluster_ca_certificate" {
   value = aws_eks_cluster.main.certificate_authority[0].data
 }
 
+output "cluster_security_group_id" {
+  value = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
+}
+
 output "kubeconfig" {
   value = <<KUBECONFIG
 apiVersion: v1
@@ -152,8 +148,4 @@ KUBECONFIG
 
 output "node_group_arn" {
   value = aws_eks_node_group.main.arn
-}
-
-output "cluster_security_group_id" {
-  value = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
 }
