@@ -46,7 +46,12 @@ resource "aws_internet_gateway" "main" {
 }
 
 # Check for existing Elastic IPs
-data "aws_eips" "existing" {
+data "aws_eip" "existing" {
+  count = var.az_count
+  filter {
+    name   = "tag:Name"
+    values = ["${var.environment}-nat-eip-${count.index + 1}"]
+  }
   tags = {
     Environment = var.environment
     Purpose     = "NAT"
@@ -54,8 +59,8 @@ data "aws_eips" "existing" {
 }
 
 locals {
-  existing_eip_count = length(data.aws_eips.existing.ids)
-  eips_to_create     = max(var.az_count - local.existing_eip_count, 0)
+  existing_eip_count = length([for eip in data.aws_eip.existing : eip.id if eip.id != null])
+  eips_to_create     = var.az_count - local.existing_eip_count
 }
 
 # Create new Elastic IPs only if they don't exist
@@ -75,9 +80,15 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  count         = var.az_count
-  allocation_id = element(concat(data.aws_eips.existing.ids, aws_eip.nat[*].id), count.index)
-  subnet_id     = aws_subnet.public[count.index].id
+  count = var.az_count
+  allocation_id = element(
+    concat(
+      [for eip in data.aws_eip.existing : eip.id if eip.id != null],
+      aws_eip.nat[*].id
+    ),
+    count.index
+  )
+  subnet_id = aws_subnet.public[count.index].id
 
   tags = {
     Name = "${var.environment}-nat-gw-${count.index + 1}"
