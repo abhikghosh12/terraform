@@ -40,12 +40,12 @@ jobs:
         echo "Using chart at: $CHART_PATH"
         terraform plan -out=tfplan
 
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      env:
-        TF_LOG: DEBUG
-      run: |
-        terraform apply -auto-approve tfplan
+    # - name: Terraform Apply
+    #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #   env:
+    #     TF_LOG: DEBUG
+    #   run: |
+    #     terraform apply -auto-approve tfplan
 
     - name: Terraform Destroy
       env:
