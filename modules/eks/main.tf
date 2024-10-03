@@ -108,3 +108,18 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   role       = aws_iam_role.eks_node_group.name
 }
 
+resource "null_resource" "update_kubeconfig" {
+  depends_on = [aws_eks_cluster.main, kubernetes_config_map_v1.aws_auth]
+
+  provisioner "local-exec" {
+    command = "aws eks update-kubeconfig --name ${aws_eks_cluster.main.name} --region ${var.aws_region}"
+  }
+}
+
+resource "null_resource" "verify_cluster_access" {
+  depends_on = [null_resource.update_kubeconfig]
+
+  provisioner "local-exec" {
+    command = "kubectl get nodes"
+  }
+}
