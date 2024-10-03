@@ -45,7 +45,7 @@
 # }
 
 module "voice_app" {
-  source               = "./modules/voice-app"
+  source               = "./modules/voice_app"
   namespace            = var.namespace
   release_name         = var.release_name
   chart_path           = "${path.root}/Charts/voice-app-0.1.0.tgz"
