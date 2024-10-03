@@ -83,3 +83,8 @@ variable "ingress_host" {
   type        = string
   default     = "voice.app.com"
 }
+
+variable "chart_path" {
+  description = "Path to the Helm chart"
+  type        = string
+}

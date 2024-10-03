@@ -8,6 +8,11 @@ variable "release_name" {
   type        = string
 }
 
+variable "chart_path" {
+  description = "Path to the Helm chart"
+  type        = string
+}
+
 variable "chart_version" {
   description = "Version of the Helm chart"
   type        = string

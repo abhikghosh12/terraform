@@ -48,6 +48,7 @@ module "voice_app" {
   source               = "./modules/voice-app"
   namespace            = var.namespace
   release_name         = var.release_name
+  chart_path           = "${path.root}/Charts/voice-app-0.1.0.tgz"
   chart_version        = var.chart_version
   webapp_image_tag     = var.webapp_image_tag
   worker_image_tag     = var.worker_image_tag

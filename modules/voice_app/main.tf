@@ -50,7 +50,7 @@ resource "kubernetes_persistent_volume_claim" "output" {
 
 resource "helm_release" "voice_app" {
   name       = var.release_name
-  chart      = "${path.root}/Charts/voice-app-0.1.0.tgz"
+  chart      = var.chart_path
   namespace  = kubernetes_namespace.voice_app.metadata[0].name
   version    = var.chart_version
 
