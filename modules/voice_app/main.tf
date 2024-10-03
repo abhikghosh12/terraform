@@ -2,6 +2,10 @@ resource "kubernetes_namespace" "voice_app" {
   metadata {
     name = var.namespace
   }
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "kubernetes_storage_class" "gp2" {
@@ -14,6 +18,10 @@ resource "kubernetes_storage_class" "gp2" {
   }
   reclaim_policy      = "Retain"
   allow_volume_expansion = true
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "kubernetes_persistent_volume_claim" "uploads" {
@@ -30,6 +38,14 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      metadata[0].annotations,
+      metadata[0].labels,
+      spec[0].volume_name,
+    ]
+  }
 }
 
 resource "kubernetes_persistent_volume_claim" "output" {
@@ -45,6 +61,14 @@ resource "kubernetes_persistent_volume_claim" "output" {
         storage = "1Gi"
       }
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata[0].annotations,
+      metadata[0].labels,
+      spec[0].volume_name,
+    ]
   }
 }
 
@@ -72,6 +96,13 @@ resource "helm_release" "voice_app" {
     kubernetes_persistent_volume_claim.uploads,
     kubernetes_persistent_volume_claim.output
   ]
+
+  lifecycle {
+    ignore_changes = [
+      values,
+      version,
+    ]
+  }
 }
 
 data "kubernetes_ingress_v1" "voice_app" {
@@ -81,6 +112,15 @@ data "kubernetes_ingress_v1" "voice_app" {
   }
 
   depends_on = [helm_release.voice_app]
+}
+
+output "ingress_hostname" {
+  description = "Hostname of the Voice App ingress"
+  value       = try(data.kubernetes_ingress_v1.voice_app.status[0].load_balancer[0].ingress[0].hostname, "")
+}
+
+output "helm_status" {
+  value = helm_release.voice_app.status
 }
 
 
