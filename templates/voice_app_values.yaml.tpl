@@ -26,6 +26,7 @@ redis:
     persistence:
       enabled: false
       size: 5Gi
+      storageClassName: "efs-sc"
       existingClaim: voice-app-redis-data
   auth:
     enabled: false
@@ -34,6 +35,8 @@ persistence:
   uploads:
     enabled: true
     existingClaim: voice-app-uploads
+    storageClassName: "efs-sc"
   output:
     enabled: true
     existingClaim: voice-app-output
+    storageClassName: "efs-sc"
