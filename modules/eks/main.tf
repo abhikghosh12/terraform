@@ -1,26 +1,11 @@
 # modules/eks/main.tf# modules/eks/main.tf
 
-data "aws_eks_cluster" "existing" {
-  name = var.cluster_name
-  count = 1
-}
 locals {
   eks_cluster_role_name = "${var.cluster_name}-eks-cluster-role"
   eks_node_group_role_name = "${var.cluster_name}-eks-node-group-role"
 }
 
-data "aws_iam_role" "existing_cluster_role" {
-  name = local.eks_cluster_role_name
-  count = 1
-}
-
-data "aws_iam_role" "existing_node_group_role" {
-  name = local.eks_node_group_role_name
-  count = 1
-}
-
 resource "aws_iam_role" "eks_cluster" {
-  count = length(data.aws_iam_role.existing_cluster_role) > 0 ? 0 : 1
   name = local.eks_cluster_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -40,7 +25,7 @@ resource "aws_iam_role" "eks_cluster" {
 }
 
 resource "aws_iam_role" "eks_node_group" {
-  count = length(data.aws_iam_role.existing_node_group_role) > 0 ? 0 : 1
+
   name = local.eks_node_group_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -60,7 +45,6 @@ resource "aws_iam_role" "eks_node_group" {
 }
 
 resource "aws_eks_cluster" "main" {
-  count = length(data.aws_eks_cluster.existing) > 0 ? 0 : 1
   name     = var.cluster_name
   role_arn = length(data.aws_iam_role.existing_cluster_role) > 0 ? data.aws_iam_role.existing_cluster_role[0].arn : aws_iam_role.eks_cluster[0].arn
   version  = "1.31"
@@ -117,6 +101,4 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry" {
 }
 
 
-
-# ... rest of the file remains the same ...
 
