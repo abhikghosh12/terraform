@@ -1,10 +1,10 @@
-output "voice_app_ingress_hostname" {
-  value = module.voice_app.ingress_hostname
-}
+# output "voice_app_ingress_hostname" {
+#   value = module.voice_app.ingress_hostname
+# }
 
-output "voice_app_helm_status" {
-  value = module.voice_app.helm_status
-}
+# output "voice_app_helm_status" {
+#   value = module.voice_app.helm_status
+# }
 
 # output "cluster_security_group_id" {
 #   description = "Security group ids attached to the cluster control plane"
