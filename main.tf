@@ -19,11 +19,11 @@ module "eks" {
  # depends_on = [module.vpc]
 }
 
-# resource "time_sleep" "wait_for_eks" {
-#   depends_on = [module.eks]
+resource "time_sleep" "wait_for_eks" {
+  depends_on = [module.eks]
 
-#   create_duration = "1800s"  # 30 minutes
-# }
+  create_duration = "1800s"  # 30 minutes
+}
 
 resource "local_file" "kubeconfig" {
   content  = module.eks.kubeconfig
