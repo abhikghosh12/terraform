@@ -77,15 +77,11 @@ resource "helm_release" "voice_app" {
       worker_replica_count = var.worker_replica_count
       ingress_enabled      = var.ingress_enabled
       ingress_host         = var.ingress_host
-      uploads_pvc_name     = kubernetes_persistent_volume_claim.uploads.metadata[0].name
-      output_pvc_name      = kubernetes_persistent_volume_claim.output.metadata[0].name
     })
   ]
 
   depends_on = [
-    kubernetes_namespace.voice_app,
-    kubernetes_persistent_volume_claim.uploads,
-    kubernetes_persistent_volume_claim.output
+    kubernetes_namespace.voice_app
   ]
 
   lifecycle {
