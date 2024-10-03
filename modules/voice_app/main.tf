@@ -45,67 +45,64 @@ resource "helm_release" "voice_app" {
   }
 }
 
-# resource "kubernetes_persistent_volume_claim" "uploads" {
-#   metadata {
-#     name      = "voice-app-uploads"
-#     namespace = kubernetes_namespace.voice_app.metadata[0].name
-#   }
-#   spec {
-#     access_modes = ["ReadWriteMany"]
-#     storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
-#     resources {
-#       requests = {
-#         storage = "1Gi"
-#       }
-#     }
-#   }
+resource "kubernetes_persistent_volume_claim" "uploads" {
+  metadata {
+    name      = "voice-app-uploads"
+    namespace = kubernetes_namespace.voice_app.metadata[0].name
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
+    resources {
+      requests = {
+        storage = "1Gi"
+      }
+    }
+  }
 
-#   lifecycle {
-#     ignore_changes = [
-#       metadata[0].annotations,
-#       metadata[0].labels,
-#       spec[0].volume_name,
-#     ]
-#   }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].annotations,
+      metadata[0].labels,
+      spec[0].volume_name,
+    ]
+  }
 
-#   timeouts {
-#     create = "10m"
-#     update = "10m"
-#   }
+  timeouts {
+    create = "10m"
+  }
 
+}
 
-# }
+resource "kubernetes_persistent_volume_claim" "output" {
+  metadata {
+    name      = "voice-app-output"
+    namespace = kubernetes_namespace.voice_app.metadata[0].name
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
+    resources {
+      requests = {
+        storage = "1Gi"
+      }
+    }
+  }
 
-# resource "kubernetes_persistent_volume_claim" "output" {
-#   metadata {
-#     name      = "voice-app-output"
-#     namespace = kubernetes_namespace.voice_app.metadata[0].name
-#   }
-#   spec {
-#     access_modes = ["ReadWriteMany"]
-#     storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
-#     resources {
-#       requests = {
-#         storage = "1Gi"
-#       }
-#     }
-#   }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].annotations,
+      metadata[0].labels,
+      spec[0].volume_name,
+    ]
+  }
 
-#   lifecycle {
-#     ignore_changes = [
-#       metadata[0].annotations,
-#       metadata[0].labels,
-#       spec[0].volume_name,
-#     ]
-#   }
+  timeouts {
+    create = "10m"
 
-#   timeouts {
-#     create = "10m"
-#     update = "10m"
-#   }
+  }
 
-
-# }
+}
 
 data "kubernetes_ingress_v1" "voice_app" {
   metadata {
@@ -115,6 +112,7 @@ data "kubernetes_ingress_v1" "voice_app" {
 
   depends_on = [helm_release.voice_app]
 }
+
 
 
 
