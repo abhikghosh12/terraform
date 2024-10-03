@@ -21,6 +21,7 @@ resource "aws_iam_role" "eks_cluster" {
   })
   lifecycle {
     ignore_changes = [assume_role_policy]
+    create_before_destroy = true
   }
 }
 
@@ -40,6 +41,7 @@ resource "aws_iam_role" "eks_node_group" {
   })
   lifecycle {
     ignore_changes = [assume_role_policy]
+    create_before_destroy = true
   }
 }
 
@@ -54,6 +56,9 @@ resource "aws_eks_cluster" "main" {
     aws_iam_role_policy_attachment.eks_cluster_policy,
     aws_iam_role_policy_attachment.eks_vpc_resource_controller,
   ]
+  lifecycle {
+    ignore_changes = [version]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -78,10 +83,14 @@ resource "aws_eks_node_group" "main" {
   }
   instance_types = ["t3.medium"]
   depends_on = [
+    aws_eks_cluster.main,
     aws_iam_role_policy_attachment.eks_node_group_policy,
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_iam_role_policy_attachment.eks_container_registry,
   ]
+  lifecycle {
+    ignore_changes = [scaling_config[0].desired_size]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
