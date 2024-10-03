@@ -25,6 +25,7 @@ redis:
   master:
     persistence:
       enabled: true
+      size: 5Gi
       existingClaim: voice-app-redis-data
   auth:
     enabled: false
