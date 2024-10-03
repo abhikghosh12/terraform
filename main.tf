@@ -1,19 +1,19 @@
 # ... (previous modules and resources)
 
-# module "vpc" {
-#   source      = "./modules/vpc"
-#   vpc_cidr    = var.vpc_cidr
-#   az_count    = var.az_count
-#   environment = var.environment
-#   create_nat_gateway = true
-# }
+module "vpc" {
+  source      = "./modules/vpc"
+  vpc_cidr    = var.vpc_cidr
+  az_count    = var.az_count
+  environment = var.environment
+  create_nat_gateway = true
+}
 
-# module "eks" {
-#   source       = "./modules/eks"
-#   cluster_name = var.cluster_name
-#   vpc_id       = module.vpc.vpc_id
-#   subnet_ids   = module.vpc.private_subnet_ids
-# }
+module "eks" {
+  source       = "./modules/eks"
+  cluster_name = var.cluster_name
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.private_subnet_ids
+}
 
 # resource "time_sleep" "wait_for_eks" {
 #   depends_on = [module.eks]
