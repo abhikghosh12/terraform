@@ -8,19 +8,10 @@ resource "kubernetes_namespace" "voice_app" {
   }
 }
 
-resource "kubernetes_storage_class" "gp2" {
+# Replace the kubernetes_storage_class resource with this data source
+data "kubernetes_storage_class" "gp2" {
   metadata {
     name = "gp2"
-  }
-  storage_provisioner = "kubernetes.io/aws-ebs"
-  parameters = {
-    type = "gp2"
-  }
-  reclaim_policy      = "Retain"
-  allow_volume_expansion = true
-
-  lifecycle {
-    ignore_changes = all
   }
 }
 
@@ -31,7 +22,7 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
   }
   spec {
     access_modes = ["ReadWriteMany"]
-    storage_class_name = kubernetes_storage_class.gp2.metadata[0].name
+    storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
     resources {
       requests = {
         storage = "1Gi"
@@ -55,7 +46,7 @@ resource "kubernetes_persistent_volume_claim" "output" {
   }
   spec {
     access_modes = ["ReadWriteMany"]
-    storage_class_name = kubernetes_storage_class.gp2.metadata[0].name
+    storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
     resources {
       requests = {
         storage = "1Gi"
@@ -113,7 +104,6 @@ data "kubernetes_ingress_v1" "voice_app" {
 
   depends_on = [helm_release.voice_app]
 }
-
 
 
 
