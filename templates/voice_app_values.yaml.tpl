@@ -18,12 +18,21 @@ ingress:
 
 service:
   type: ClusterIP
-  port: 80
+  port: 5000
 
 redis:
+  enabled: true
   master:
     persistence:
-      enabled: false
+      enabled: true
+      existingClaim: voice-app-redis-data
+  auth:
+    enabled: false
 
-configMap:
-  REDIS_URL: "redis://{{ .Release.Name }}-redis-master:6379"
+persistence:
+  uploads:
+    enabled: true
+    existingClaim: voice-app-uploads
+  output:
+    enabled: true
+    existingClaim: voice-app-output

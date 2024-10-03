@@ -1,5 +1,5 @@
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
+variable "namespace" {
+  description = "Kubernetes namespace for the Voice app"
   type        = string
 }
 
@@ -8,18 +8,8 @@ variable "release_name" {
   type        = string
 }
 
-variable "chart_path" {
-  description = "Path to the Helm chart"
-  type        = string
-}
-
 variable "chart_version" {
   description = "Version of the Helm chart"
-  type        = string
-}
-
-variable "namespace" {
-  description = "Kubernetes namespace for the Voice app"
   type        = string
 }
 
@@ -52,11 +42,3 @@ variable "ingress_host" {
   description = "Ingress host"
   type        = string
 }
-
-# Add this new variable
-variable "values_template_path" {
-  description = "Path to the values template file"
-  type        = string
-}
-
-# ... (keep all other existing variables)

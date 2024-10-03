@@ -6,12 +6,6 @@ variable "aws_region" {
   default     = "eu-central-1"
 }
 
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "production"
-}
-
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
@@ -24,28 +18,34 @@ variable "az_count" {
   default     = 2
 }
 
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "production"
+}
+
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
   default     = "voice-app-cluster"
 }
 
+variable "namespace" {
+  description = "Kubernetes namespace for the Voice app"
+  type        = string
+  default     = "voice-app"
+}
+
 variable "release_name" {
-  description = "Helm release name for the Voice app"
+  description = "Name of the Helm release"
   type        = string
   default     = "voice-app"
 }
 
 variable "chart_version" {
-  description = "Version of the Helm chart for Voice App"
+  description = "Version of the Helm chart"
   type        = string
   default     = "0.1.0"
-}
-
-variable "namespace" {
-  description = "Kubernetes namespace for the Voice app"
-  type        = string
-  default     = "voice-app"
 }
 
 variable "webapp_image_tag" {
