@@ -2,13 +2,13 @@
 
 
 
-# module "vpc" {
-#   source      = "./modules/vpc"
-#   vpc_cidr    = var.vpc_cidr
-#   az_count    = var.az_count
-#   environment = var.environment
-#   create_nat_gateway = true  # Set to true if you want to create NAT Gateways
-# }
+module "vpc" {
+  source      = "./modules/vpc"
+  vpc_cidr    = var.vpc_cidr
+  az_count    = var.az_count
+  environment = var.environment
+  create_nat_gateway = true  # Set to true if you want to create NAT Gateways
+}
 
 module "eks" {
   source       = "./modules/eks"
