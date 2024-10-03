@@ -55,7 +55,7 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
   }
   spec {
     access_modes = ["ReadWriteMany"]
-    storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
+    storage_class_name = data.kubernetes_storage_class.efs-sc.metadata[0].name
     resources {
       requests = {
         storage = "1Gi"
@@ -86,7 +86,7 @@ resource "kubernetes_persistent_volume_claim" "output" {
   }
   spec {
     access_modes = ["ReadWriteMany"]
-    storage_class_name = data.kubernetes_storage_class.gp2.metadata[0].name
+    storage_class_name = data.kubernetes_storage_class.efs-sc.metadata[0].name
     resources {
       requests = {
         storage = "1Gi"
