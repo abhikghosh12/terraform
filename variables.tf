@@ -87,4 +87,5 @@ variable "ingress_host" {
 variable "chart_path" {
   description = "Path to the Helm chart"
   type        = string
+  default     = "/Charts/voice-app-0.1.0.tgz"
 }
