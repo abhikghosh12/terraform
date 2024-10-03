@@ -21,3 +21,6 @@ output "kubeconfig" {
     certificate_authority_data = aws_eks_cluster.main.certificate_authority[0].data
   })
 }
+
+
+

@@ -1,11 +1,28 @@
 
-module "vpc" {
-  source      = "./modules/vpc"
-  vpc_cidr    = var.vpc_cidr
-  az_count    = var.az_count
-  environment = var.environment
-  create_nat_gateway = true  # Set to true if you want to create NAT Gateways
+
+resource "null_resource" "update_kubeconfig" {
+  depends_on = [aws_eks_cluster.main, kubernetes_config_map_v1.aws_auth]
+
+  provisioner "local-exec" {
+    command = "aws eks update-kubeconfig --name ${aws_eks_cluster.main.name} --region ${var.aws_region}"
+  }
 }
+
+resource "null_resource" "verify_cluster_access" {
+  depends_on = [null_resource.update_kubeconfig]
+
+  provisioner "local-exec" {
+    command = "kubectl get nodes"
+  }
+}
+
+# module "vpc" {
+#   source      = "./modules/vpc"
+#   vpc_cidr    = var.vpc_cidr
+#   az_count    = var.az_count
+#   environment = var.environment
+#   create_nat_gateway = true  # Set to true if you want to create NAT Gateways
+# }
 
 module "eks" {
   source       = "./modules/eks"
@@ -16,11 +33,11 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
-resource "time_sleep" "wait_for_eks" {
-  depends_on = [module.eks]
+# resource "time_sleep" "wait_for_eks" {
+#   depends_on = [module.eks]
 
-  create_duration = "1800s"  # 15 minutes
-}
+#   create_duration = "1800s"  # 30 minutes
+# }
 
 resource "local_file" "kubeconfig" {
   content  = module.eks.kubeconfig
