@@ -3,9 +3,9 @@ resource "kubernetes_namespace" "voice_app" {
     name = var.namespace
   }
 
-  lifecycle {
-    ignore_changes = all
-  }
+  # lifecycle {
+  #   ignore_changes = all
+  # }
 }
 
 # Replace the kubernetes_storage_class resource with this data source
@@ -30,12 +30,12 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-      metadata[0].labels,
-      spec[0].volume_name,
-    ]
+  # lifecycle {
+  #   ignore_changes = [
+  #     metadata[0].annotations,
+  #     metadata[0].labels,
+  #     spec[0].volume_name,
+  #   ]
   }
 }
 
@@ -54,13 +54,13 @@ resource "kubernetes_persistent_volume_claim" "output" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-      metadata[0].labels,
-      spec[0].volume_name,
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     metadata[0].annotations,
+  #     metadata[0].labels,
+  #     spec[0].volume_name,
+  #   ]
+  # }
 }
 
 resource "helm_release" "voice_app" {
@@ -84,12 +84,12 @@ resource "helm_release" "voice_app" {
     kubernetes_namespace.voice_app
   ]
 
-  lifecycle {
-    ignore_changes = [
-      values,
-      version,
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     values,
+  #     version,
+  #   ]
+  # }
 }
 
 data "kubernetes_ingress_v1" "voice_app" {
