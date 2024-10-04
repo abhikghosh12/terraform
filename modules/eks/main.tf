@@ -48,31 +48,31 @@ resource "aws_iam_role" "eks_node_group" {
 
 data "aws_caller_identity" "current" {}
 
-# resource "kubernetes_config_map_v1" "aws_auth" {
-#   depends_on = [aws_eks_cluster.main]
+resource "kubernetes_config_map_v1" "aws_auth" {
+  depends_on = [aws_eks_cluster.main]
 
-#   metadata {
-#     name      = "aws-auth"
-#     namespace = "kube-system"
-#   }
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
 
-#   data = {
-#     mapRoles = yamlencode([
-#       {
-#         rolearn  = aws_iam_role.eks_node_group.arn
-#         username = "system:node:{{EC2PrivateDNSName}}"
-#         groups   = ["system:bootstrappers", "system:nodes"]
-#       },
-#     ])
-#     mapUsers = yamlencode([
-#       {
-#         userarn  = data.aws_caller_identity.current.arn
-#         username = data.aws_caller_identity.current.user_id
-#         groups   = ["system:masters"]
-#       },
-#     ])
-#   }
-# }
+  data = {
+    mapRoles = yamlencode([
+      {
+        rolearn  = aws_iam_role.eks_node_group.arn
+        username = "system:node:{{EC2PrivateDNSName}}"
+        groups   = ["system:bootstrappers", "system:nodes"]
+      },
+    ])
+    mapUsers = yamlencode([
+      {
+        userarn  = data.aws_caller_identity.current.arn
+        username = data.aws_caller_identity.current.user_id
+        groups   = ["system:masters"]
+      },
+    ])
+  }
+}
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
