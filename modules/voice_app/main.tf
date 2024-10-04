@@ -36,7 +36,7 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
   #     metadata[0].labels,
   #     spec[0].volume_name,
   #   ]
-  }
+  #}
 }
 
 resource "kubernetes_persistent_volume_claim" "output" {
