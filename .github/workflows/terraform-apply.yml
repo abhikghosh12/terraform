@@ -38,7 +38,7 @@ jobs:
     - name: Terraform Plan
       run: |
         echo "Using chart at: $CHART_PATH"
-        terraform plan -out=tfplan
+        terraform plan -out=tfplan -parallelism=20 -refresh=false
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
