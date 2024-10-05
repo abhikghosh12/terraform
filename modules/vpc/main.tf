@@ -60,9 +60,9 @@ resource "aws_eip" "nat" {
     Purpose     = "NAT"
   }
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_nat_gateway" "main" {

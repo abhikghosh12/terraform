@@ -71,21 +71,12 @@ resource "null_resource" "install_efs_csi_driver" {
 }
 
 
-module "k8s_resources" {
-  source              = "./modules/k8s_resources"
-  namespace           = var.namespace
-  efs_id              = module.efs.efs_id
-  uploads_storage_size = "1Gi"  # Or any other size you need
-  output_storage_size  = "1Gi" # Or any other size you need
-
-  depends_on = [null_resource.install_efs_csi_driver]
-}
 
 module "voice_app" {
   source               = "./modules/voice_app"
-  namespace            = module.k8s_resources.namespace
+  namespace            = var.namespace
   release_name         = var.release_name
-  chart_path           = "${path.root}/Charts/voice-app-0.1.0.tgz"
+  chart_path           = var.chart_path
   chart_version        = var.chart_version
   webapp_image_tag     = var.webapp_image_tag
   worker_image_tag     = var.worker_image_tag
@@ -93,10 +84,22 @@ module "voice_app" {
   worker_replica_count = var.worker_replica_count
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
-  storage_class_name   = module.k8s_resources.storage_class_name
-  
-  depends_on = [module.k8s_resources]
+  storage_class_name   = "efs-sc"
+
+  depends_on = [module.eks, module.efs]
 }
+
+module "k8s_resources" {
+  source               = "./modules/k8s_resources"
+  namespace            = var.namespace
+  efs_id               = module.efs.efs_id
+  uploads_storage_size = var.uploads_storage_size
+  output_storage_size  = var.output_storage_size
+  voice_app_release_id = module.voice_app.helm_release_id
+
+  depends_on = [module.voice_app]
+}
+
 
 # module "route53" {
 #   source      = "./modules/route53"

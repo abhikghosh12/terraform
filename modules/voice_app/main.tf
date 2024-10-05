@@ -18,6 +18,16 @@ resource "helm_release" "voice_app" {
     })
   ]
 
+  set {
+    name  = "persistence.uploads.storageClass"
+    value = var.storage_class_name
+  }
+
+  set {
+    name  = "persistence.output.storageClass"
+    value = var.storage_class_name
+  }
+
   lifecycle {
     ignore_changes = [
       values,
@@ -26,13 +36,9 @@ resource "helm_release" "voice_app" {
   }
 }
 
-data "kubernetes_ingress_v1" "voice_app" {
-  metadata {
-    name      = "${var.release_name}-ingress"
-    namespace = var.namespace
-  }
-
-  depends_on = [helm_release.voice_app]
+output "helm_release_id" {
+  value = helm_release.voice_app.id
+  description = "The ID of the Helm release for the voice app"
 }
 
 

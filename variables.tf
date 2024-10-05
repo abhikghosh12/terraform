@@ -48,6 +48,11 @@ variable "chart_version" {
   default     = "0.1.0"
 }
 
+variable "chart_path" {
+  description = "Path to the Helm chart for the voice app"
+  type        = string
+  default     = "Charts/voice-app-0.1.0.tgz"
+}
 variable "webapp_image_tag" {
   description = "Docker image tag for the webapp"
   type        = string
@@ -84,6 +89,17 @@ variable "ingress_host" {
   default     = "voice.app.com"
 }
 
+variable "uploads_storage_size" {
+  description = "Size of the storage for uploads PVC"
+  type        = string
+  default     = "1Gi"
+}
+
+variable "output_storage_size" {
+  description = "Size of the storage for output PVC"
+  type        = string
+  default     = "1Gi"
+}
 
 # variable "domain_name" {
 #   description = "Domain name for external DNS"

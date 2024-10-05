@@ -1,21 +1,8 @@
 # modules/k8s_resources/main.tf
 
-resource "kubernetes_namespace" "voice_app" {
-  metadata {
-    name = var.namespace
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "kubernetes_storage_class" "efs" {
   metadata {
     name = "efs-sc"
-    annotations = {
-      "storageclass.kubernetes.io/is-default-class" = "true"
-    }
   }
   storage_provisioner = "efs.csi.aws.com"
   parameters = {
@@ -23,84 +10,80 @@ resource "kubernetes_storage_class" "efs" {
     fileSystemId     = var.efs_id
     directoryPerms   = "700"
   }
-  lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-    ]
-  }
 }
 
-resource "kubernetes_persistent_volume" "efs" {
+resource "kubernetes_persistent_volume" "uploads" {
   metadata {
-    name = "efs-pv"
+    name = "voice-app-uploads-pv"
   }
   spec {
     capacity = {
-      storage = "5Gi"
+      storage = var.uploads_storage_size
     }
-    volume_mode                      = "Filesystem"
-    access_modes                     = ["ReadWriteMany"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.efs.metadata[0].name
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = kubernetes_storage_class.efs.metadata[0].name
     persistent_volume_source {
       csi {
-        driver        = "efs.csi.aws.com"
-        volume_handle = var.efs_id
+        driver = "efs.csi.aws.com"
+        volume_handle = "${var.efs_id}:/uploads"
       }
     }
   }
-  depends_on = [kubernetes_storage_class.efs]
 }
+
+resource "kubernetes_persistent_volume" "output" {
+  metadata {
+    name = "voice-app-output-pv"
+  }
+  spec {
+    capacity = {
+      storage = var.output_storage_size
+    }
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = kubernetes_storage_class.efs.metadata[0].name
+    persistent_volume_source {
+      csi {
+        driver = "efs.csi.aws.com"
+        volume_handle = "${var.efs_id}:/output"
+      }
+    }
+  }
+}
+
 resource "kubernetes_persistent_volume_claim" "uploads" {
   metadata {
     name      = "voice-app-uploads"
-    namespace = kubernetes_namespace.voice_app.metadata[0].name
+    namespace = var.namespace
   }
   spec {
-    access_modes       = ["ReadWriteMany"]
+    access_modes = ["ReadWriteMany"]
     storage_class_name = kubernetes_storage_class.efs.metadata[0].name
+    volume_name = kubernetes_persistent_volume.uploads.metadata[0].name
     resources {
       requests = {
         storage = var.uploads_storage_size
       }
     }
   }
-  lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-      metadata[0].labels,
-      spec[0].volume_name,
-    ]
-  }
+
+  depends_on = [var.voice_app_release_id]
 }
 
 resource "kubernetes_persistent_volume_claim" "output" {
   metadata {
     name      = "voice-app-output"
-    namespace = kubernetes_namespace.voice_app.metadata[0].name
+    namespace = var.namespace
   }
   spec {
-    access_modes       = ["ReadWriteMany"]
+    access_modes = ["ReadWriteMany"]
     storage_class_name = kubernetes_storage_class.efs.metadata[0].name
+    volume_name = kubernetes_persistent_volume.output.metadata[0].name
     resources {
       requests = {
         storage = var.output_storage_size
       }
     }
   }
-  lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-      metadata[0].labels,
-      spec[0].volume_name,
-    ]
-  }
-}
 
-output "namespace" {
-  value = kubernetes_namespace.voice_app.metadata[0].name
-}
-
-output "storage_class_name" {
-  value = kubernetes_storage_class.efs.metadata[0].name
+  depends_on = [var.voice_app_release_id]
 }
