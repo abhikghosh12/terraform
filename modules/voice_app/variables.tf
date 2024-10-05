@@ -55,3 +55,9 @@ variable "chart_version" {
   type        = string
   default     = "0.1.0"
 }
+
+variable "create_namespace" {
+  description = "Whether to create the namespace"
+  type        = bool
+  default     = true
+}

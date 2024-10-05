@@ -75,6 +75,7 @@ resource "null_resource" "install_efs_csi_driver" {
 module "voice_app" {
   source               = "./modules/voice_app"
   namespace            = var.namespace
+  create_namespace     = true
   release_name         = var.release_name
   chart_path           = var.chart_path
   chart_version        = var.chart_version

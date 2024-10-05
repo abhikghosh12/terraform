@@ -1,10 +1,12 @@
 # modules/voice_app/main.tf
 
-locals {
-  # Extract the version from the chart filename
-  chart_version = split("-", basename(var.chart_path))[2]
-}
+resource "kubernetes_namespace" "voice_app" {
+  count = var.create_namespace ? 1 : 0
 
+  metadata {
+    name = var.namespace
+  }
+}
 resource "helm_release" "voice_app" {
   name      = var.release_name
   chart     = var.chart_path
