@@ -72,9 +72,11 @@ resource "null_resource" "install_efs_csi_driver" {
 
 
 module "k8s_resources" {
-  source    = "./modules/k8s_resources"
-  namespace = var.namespace
-  efs_id    = module.efs.efs_id
+  source              = "./modules/k8s_resources"
+  namespace           = var.namespace
+  efs_id              = module.efs.efs_id
+  uploads_storage_size = "1Gi"  # Or any other size you need
+  output_storage_size  = "1Gi" # Or any other size you need
 
   depends_on = [null_resource.install_efs_csi_driver]
 }
@@ -96,18 +98,18 @@ module "voice_app" {
   depends_on = [module.k8s_resources]
 }
 
-# module "route53" {
-#   source      = "./modules/route53"
-#   domain_name = var.domain_name
-#   environment = var.environment
-# }
+module "route53" {
+  source      = "./modules/route53"
+  domain_name = var.domain_name
+  environment = var.environment
+}
 
-# module "external_dns" {
-#   source          = "./modules/external_dns"
-#   cluster_name    = var.cluster_name
-#   domain_name     = var.domain_name
-#   route53_zone_id = module.route53.zone_id
-#   eks_depends_on  = module.eks.cluster_id
+module "external_dns" {
+  source          = "./modules/external_dns"
+  cluster_name    = var.cluster_name
+  domain_name     = var.domain_name
+  route53_zone_id = module.route53.zone_id
+  eks_depends_on  = module.eks.cluster_id
 
-#   depends_on = [module.eks, module.route53]
-# }
+  depends_on = [module.eks, module.route53]
+}

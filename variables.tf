@@ -85,7 +85,7 @@ variable "ingress_host" {
 }
 
 
-# variable "domain_name" {
-#   description = "Domain name for external DNS"
-#   type        = string
-# }
+variable "domain_name" {
+  description = "Domain name for external DNS"
+  type        = string
+}

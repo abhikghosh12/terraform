@@ -30,28 +30,6 @@ resource "kubernetes_storage_class" "efs" {
   }
 }
 
-resource "kubernetes_persistent_volume" "efs" {
-  metadata {
-    name = "efs-pv"
-  }
-  spec {
-    capacity = {
-      storage = "5Gi"
-    }
-    volume_mode                      = "Filesystem"
-    access_modes                     = ["ReadWriteMany"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.efs.metadata[0].name
-    persistent_volume_source {
-      csi {
-        driver        = "efs.csi.aws.com"
-        volume_handle = var.efs_id
-      }
-    }
-  }
-  depends_on = [kubernetes_storage_class.efs]
-}
-
 resource "kubernetes_persistent_volume_claim" "uploads" {
   metadata {
     name      = "voice-app-uploads"
@@ -62,7 +40,7 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
     storage_class_name = kubernetes_storage_class.efs.metadata[0].name
     resources {
       requests = {
-        storage = "1Gi"
+        storage = var.uploads_storage_size
       }
     }
   }
@@ -73,7 +51,6 @@ resource "kubernetes_persistent_volume_claim" "uploads" {
       spec[0].volume_name,
     ]
   }
-  depends_on = [kubernetes_persistent_volume.efs]
 }
 
 resource "kubernetes_persistent_volume_claim" "output" {
@@ -86,7 +63,7 @@ resource "kubernetes_persistent_volume_claim" "output" {
     storage_class_name = kubernetes_storage_class.efs.metadata[0].name
     resources {
       requests = {
-        storage = "1Gi"
+        storage = var.output_storage_size
       }
     }
   }
@@ -97,7 +74,6 @@ resource "kubernetes_persistent_volume_claim" "output" {
       spec[0].volume_name,
     ]
   }
-  depends_on = [kubernetes_persistent_volume.efs]
 }
 
 output "namespace" {
