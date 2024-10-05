@@ -89,9 +89,3 @@ variable "domain_name" {
   description = "Domain name for external DNS"
   type        = string
 }
-
-
-variable "environment" {
-  description = "The environment (e.g., prod, staging, dev)"
-  type        = string
-}
