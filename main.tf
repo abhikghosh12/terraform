@@ -65,9 +65,9 @@ resource "null_resource" "install_efs_csi_driver" {
     command = "kubectl --kubeconfig=${local_file.kubeconfig.filename} apply -k \"github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.3\""
   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
 }
 
 module "voice_app" {

@@ -50,12 +50,12 @@ resource "helm_release" "voice_app" {
     var.pvc_dependencies
   ]
 
-  lifecycle {
-    ignore_changes = [
-      values,
-      version,
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     values,
+  #     version,
+  #   ]
+  # }
 }
 
 data "kubernetes_ingress_v1" "voice_app" {

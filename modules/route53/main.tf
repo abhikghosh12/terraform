@@ -35,9 +35,9 @@ resource "aws_acm_certificate" "main" {
     ManagedBy   = "Terraform"
   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
 }
 
 resource "aws_acm_certificate_validation" "main" {
