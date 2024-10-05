@@ -7,7 +7,7 @@ resource "helm_release" "voice_app" {
   version   = var.chart_version
 
   values = [
-    templatefile("${path.module}/voice_app_values.yaml.tpl", {
+    templatefile("${path.module}/templates/voice_app_values.yaml.tpl", {
       webapp_image_tag     = var.webapp_image_tag
       worker_image_tag     = var.worker_image_tag
       webapp_replica_count = var.webapp_replica_count
