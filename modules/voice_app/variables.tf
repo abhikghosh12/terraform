@@ -1,10 +1,5 @@
 # modules/voice_app/variables.tf
 
-variable "namespace" {
-  description = "Kubernetes namespace for the Voice app"
-  type        = string
-}
-
 variable "release_name" {
   description = "Name of the Helm release"
   type        = string
@@ -15,8 +10,8 @@ variable "chart_path" {
   type        = string
 }
 
-variable "chart_version" {
-  description = "Version of the Helm chart"
+variable "namespace" {
+  description = "Kubernetes namespace for the Voice app"
   type        = string
 }
 
@@ -41,12 +36,12 @@ variable "worker_replica_count" {
 }
 
 variable "ingress_enabled" {
-  description = "Enable ingress"
+  description = "Whether to enable ingress"
   type        = bool
 }
 
 variable "ingress_host" {
-  description = "Ingress host"
+  description = "Hostname for the ingress"
   type        = string
 }
 

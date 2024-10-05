@@ -1,10 +1,15 @@
 # modules/voice_app/main.tf
 
+locals {
+  # Extract the version from the chart filename
+  chart_version = split("-", basename(var.chart_path))[2]
+}
+
 resource "helm_release" "voice_app" {
   name      = var.release_name
   chart     = var.chart_path
   namespace = var.namespace
-  version   = var.chart_version
+  version   = trimsuffix(local.chart_version, ".tgz")
 
   values = [
     templatefile("${path.module}/templates/voice_app_values.yaml.tpl", {
@@ -34,6 +39,16 @@ resource "helm_release" "voice_app" {
       version,
     ]
   }
+}
+
+# Add this data source if you need to fetch ingress information
+data "kubernetes_ingress_v1" "voice_app" {
+  metadata {
+    name      = "${var.release_name}-ingress"
+    namespace = var.namespace
+  }
+
+  depends_on = [helm_release.voice_app]
 }
 
 
