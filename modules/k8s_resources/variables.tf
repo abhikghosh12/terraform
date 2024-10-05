@@ -13,12 +13,12 @@ variable "efs_id" {
 variable "uploads_storage_size" {
   description = "Size of the storage for uploads PV and PVC"
   type        = string
-  default     = "5Gi"
+  default     = "1Gi"
 }
 
 variable "output_storage_size" {
   description = "Size of the storage for output PV and PVC"
   type        = string
-  default     = "5Gi"
+  default     = "1Gi"
 }
 
