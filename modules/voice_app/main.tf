@@ -1,5 +1,4 @@
 # modules/voice_app/main.tf
-
 resource "kubernetes_namespace" "voice_app" {
   count = var.create_namespace ? 1 : 0
 
@@ -7,6 +6,7 @@ resource "kubernetes_namespace" "voice_app" {
     name = var.namespace
   }
 }
+
 resource "helm_release" "voice_app" {
   name      = var.release_name
   chart     = var.chart_path
@@ -26,14 +26,29 @@ resource "helm_release" "voice_app" {
   ]
 
   set {
-    name  = "persistence.uploads.storageClass"
-    value = var.storage_class_name
+    name  = "persistence.uploads.existingClaim"
+    value = "voice-app-uploads"
   }
 
   set {
-    name  = "persistence.output.storageClass"
-    value = var.storage_class_name
+    name  = "persistence.output.existingClaim"
+    value = "voice-app-output"
   }
+
+  set {
+    name  = "redis.master.persistence.existingClaim"
+    value = "redis-master"
+  }
+
+  set {
+    name  = "redis.replica.persistence.existingClaim"
+    value = "redis-replicas"
+  }
+
+  depends_on = [
+    kubernetes_namespace.voice_app,
+    var.pvc_dependencies
+  ]
 
   lifecycle {
     ignore_changes = [
@@ -42,7 +57,7 @@ resource "helm_release" "voice_app" {
     ]
   }
 }
-# Add this data source if you need to fetch ingress information
+
 data "kubernetes_ingress_v1" "voice_app" {
   metadata {
     name      = "${var.release_name}-ingress"
@@ -51,7 +66,6 @@ data "kubernetes_ingress_v1" "voice_app" {
 
   depends_on = [helm_release.voice_app]
 }
-
 
 
 

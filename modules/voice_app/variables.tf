@@ -61,3 +61,8 @@ variable "create_namespace" {
   type        = bool
   default     = true
 }
+
+variable "pvc_dependencies" {
+  description = "List of PVC names that should exist before deploying the voice app"
+  type        = list(string)
+}

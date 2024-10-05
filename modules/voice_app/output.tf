@@ -2,8 +2,6 @@ output "helm_status" {
   value = helm_release.voice_app.status
 }
 
-# modules/voice_app/outputs.tf
-
 output "helm_release_id" {
   value       = helm_release.voice_app.id
   description = "The ID of the Helm release for the voice app"

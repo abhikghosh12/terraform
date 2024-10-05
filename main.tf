@@ -70,14 +70,12 @@ resource "null_resource" "install_efs_csi_driver" {
   }
 }
 
-
-
 module "voice_app" {
   source               = "./modules/voice_app"
   namespace            = var.namespace
   create_namespace     = true
   release_name         = var.release_name
-  chart_path           = var.chart_path
+  chart_path           = "${path.root}/${var.chart_path}"
   chart_version        = var.chart_version
   webapp_image_tag     = var.webapp_image_tag
   worker_image_tag     = var.worker_image_tag
@@ -86,8 +84,9 @@ module "voice_app" {
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
   storage_class_name   = "efs-sc"
+  pvc_dependencies     = module.k8s_resources.pvc_names
 
-  depends_on = [module.eks, module.efs]
+  depends_on = [module.k8s_resources]
 }
 
 module "k8s_resources" {
@@ -96,11 +95,9 @@ module "k8s_resources" {
   efs_id               = module.efs.efs_id
   uploads_storage_size = var.uploads_storage_size
   output_storage_size  = var.output_storage_size
-  voice_app_release_id = module.voice_app.helm_release_id
 
-  depends_on = [module.voice_app]
+  depends_on = [module.eks]
 }
-
 
 # module "route53" {
 #   source      = "./modules/route53"

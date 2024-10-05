@@ -22,7 +22,3 @@ variable "output_storage_size" {
   default     = "5Gi"
 }
 
-variable "voice_app_release_id" {
-  description = "ID of the voice app Helm release"
-  type        = string
-}
