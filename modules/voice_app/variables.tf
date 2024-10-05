@@ -1,3 +1,5 @@
+# modules/voice_app/variables.tf
+
 variable "namespace" {
   description = "Kubernetes namespace for the Voice app"
   type        = string
@@ -47,3 +49,9 @@ variable "ingress_host" {
   description = "Ingress host"
   type        = string
 }
+
+variable "storage_class_name" {
+  description = "Name of the storage class to use"
+  type        = string
+}
+

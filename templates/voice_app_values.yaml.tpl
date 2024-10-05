@@ -24,19 +24,21 @@ redis:
   enabled: true
   master:
     persistence:
-      enabled: false
-      size: 5Gi
-      storageClassName: "efs-sc"
-      existingClaim: voice-app-redis-data
+      enabled: true                # Enable persistence
+      size: 1Gi                    # Size of the volume
+      storageClassName: ""         # Specify your storage class here      
   auth:
-    enabled: false
+    enabled: false                # Disable Redis authentication
+  replica:
+    kind: StatefulSet             # Use StatefulSet for Redis replicas
+    replicaCount: 2
 
 persistence:
   uploads:
     enabled: true
-    existingClaim: voice-app-uploads
-    storageClassName: "efs-sc"
+    size: 1Gi
+    storageClassName: ""     
   output:
     enabled: true
-    existingClaim: voice-app-output
-    storageClassName: "efs-sc"
+    size: 1Gi
+    storageClassName: ""     

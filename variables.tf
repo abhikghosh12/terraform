@@ -1,6 +1,6 @@
 # variables.tf
 
-variable "aws_region" {
+variable "region" {
   description = "AWS region"
   type        = string
   default     = "eu-central-1"
@@ -15,7 +15,7 @@ variable "vpc_cidr" {
 variable "az_count" {
   description = "Number of AZs to use"
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "environment" {
@@ -33,7 +33,7 @@ variable "cluster_name" {
 variable "namespace" {
   description = "Kubernetes namespace for the Voice app"
   type        = string
-  default     = "voice-app1"
+  default     = "voice-app"
 }
 
 variable "release_name" {
@@ -84,8 +84,14 @@ variable "ingress_host" {
   default     = "voice.app.com"
 }
 
-variable "chart_path" {
-  description = "Path to the Helm chart"
+
+variable "domain_name" {
+  description = "Domain name for external DNS"
   type        = string
-  default     = "/Charts/voice-app-0.1.0.tgz"
+}
+
+
+variable "environment" {
+  description = "The environment (e.g., prod, staging, dev)"
+  type        = string
 }

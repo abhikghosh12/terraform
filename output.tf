@@ -1,32 +1,26 @@
-# output "voice_app_ingress_hostname" {
-#   value = module.voice_app.ingress_hostname
-# }
+# outputs.tf
 
-# output "voice_app_helm_status" {
-#   value = module.voice_app.helm_status
-# }
-
-# output "cluster_security_group_id" {
-#   description = "Security group ids attached to the cluster control plane"
-#   value       = module.eks.cluster_security_group_id
-# }
-
-output "region" {
-  description = "AWS region"
-  value       = var.aws_region
+output "vpc_id" {
+  description = "ID of the VPC"
+  value       = module.vpc.vpc_id
 }
 
-# output "cluster_endpoint" {
-#   description = "Endpoint for EKS control plane"
-#   value       = module.eks.cluster_endpoint
-# }
+output "eks_cluster_endpoint" {
+  description = "Endpoint for EKS control plane"
+  value       = module.eks.cluster_endpoint
+}
 
-# output "cluster_name" {
-#   description = "Kubernetes Cluster Name"
-#   value       = module.eks.cluster_name
-# }
+output "eks_cluster_security_group_id" {
+  description = "Security group ID attached to the EKS cluster"
+  value       = module.eks.cluster_security_group_id
+}
 
-# output "kubeconfig_path" {
-#   description = "Path to kubeconfig file"
-#   value       = local_file.kubeconfig.filename
-# }
+output "efs_id" {
+  description = "ID of the EFS file system"
+  value       = module.efs.efs_id
+}
+
+output "efs_dns_name" {
+  description = "DNS name of the EFS file system"
+  value       = module.efs.efs_dns_name
+}
