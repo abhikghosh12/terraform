@@ -19,10 +19,10 @@ resource "aws_iam_role" "eks_cluster" {
       }
     ]
   })
-  # lifecycle {
-  #   ignore_changes = [assume_role_policy]
-  #   create_before_destroy = true
-  # }
+  lifecycle {
+    ignore_changes = [assume_role_policy]
+    create_before_destroy = true
+  }
 }
 
 resource "aws_iam_role" "eks_node_group" {
@@ -39,10 +39,10 @@ resource "aws_iam_role" "eks_node_group" {
       }
     ]
   })
-  # lifecycle {
-  #   ignore_changes = [assume_role_policy]
-  #   create_before_destroy = true
-  # }
+  lifecycle {
+    ignore_changes = [assume_role_policy]
+    create_before_destroy = true
+  }
 }
 
 
@@ -84,9 +84,9 @@ resource "aws_eks_cluster" "main" {
     aws_iam_role_policy_attachment.eks_cluster_policy,
     aws_iam_role_policy_attachment.eks_vpc_resource_controller,
   ]
-  # lifecycle {
-  #   ignore_changes = [version]
-  # }
+  lifecycle {
+    ignore_changes = [version]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -116,9 +116,9 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_iam_role_policy_attachment.eks_container_registry,
   ]
-  # lifecycle {
-  #   ignore_changes = [scaling_config[0].desired_size]
-  # }
+  lifecycle {
+    ignore_changes = [scaling_config[0].desired_size]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
@@ -136,18 +136,18 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry" {
   role       = aws_iam_role.eks_node_group.name
 }
 
-# resource "null_resource" "update_kubeconfig" {
-#   depends_on = [aws_eks_cluster.main, kubernetes_config_map_v1.aws_auth]
+resource "null_resource" "update_kubeconfig" {
+  depends_on = [aws_eks_cluster.main, kubernetes_config_map_v1.aws_auth]
 
-#   provisioner "local-exec" {
-#     command = "aws eks update-kubeconfig --name ${aws_eks_cluster.main.name} --region ${var.aws_region}"
-#   }
-# }
+  provisioner "local-exec" {
+    command = "aws eks update-kubeconfig --name ${aws_eks_cluster.main.name} --region ${var.aws_region}"
+  }
+}
 
-# resource "null_resource" "verify_cluster_access" {
-#   depends_on = [null_resource.update_kubeconfig]
+resource "null_resource" "verify_cluster_access" {
+  depends_on = [null_resource.update_kubeconfig]
 
-#   provisioner "local-exec" {
-#     command = "kubectl get nodes"
-#   }
-# }
+  provisioner "local-exec" {
+    command = "kubectl get nodes"
+  }
+}

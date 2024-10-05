@@ -30,6 +30,27 @@ resource "kubernetes_storage_class" "efs" {
   }
 }
 
+resource "kubernetes_persistent_volume" "efs" {
+  metadata {
+    name = "efs-pv"
+  }
+  spec {
+    capacity = {
+      storage = "5Gi"
+    }
+    volume_mode                      = "Filesystem"
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.efs.metadata[0].name
+    persistent_volume_source {
+      csi {
+        driver        = "efs.csi.aws.com"
+        volume_handle = var.efs_id
+      }
+    }
+  }
+  depends_on = [kubernetes_storage_class.efs]
+}
 resource "kubernetes_persistent_volume_claim" "uploads" {
   metadata {
     name      = "voice-app-uploads"
