@@ -9,7 +9,7 @@ resource "helm_release" "voice_app" {
   name      = var.release_name
   chart     = var.chart_path
   namespace = var.namespace
-  version   = trimsuffix(local.chart_version, ".tgz")
+  version   = var.chart_version
 
   values = [
     templatefile("${path.module}/templates/voice_app_values.yaml.tpl", {
@@ -40,7 +40,6 @@ resource "helm_release" "voice_app" {
     ]
   }
 }
-
 # Add this data source if you need to fetch ingress information
 data "kubernetes_ingress_v1" "voice_app" {
   metadata {

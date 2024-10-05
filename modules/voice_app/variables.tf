@@ -50,3 +50,8 @@ variable "storage_class_name" {
   type        = string
 }
 
+variable "chart_version" {
+  description = "Version of the Helm chart"
+  type        = string
+  default     = "0.1.0"
+}
