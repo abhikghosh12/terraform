@@ -1,4 +1,4 @@
-output "ingress_hostname" {
+output "ingress_host" {
   description = "Hostname of the Voice App ingress"
   value       = try(data.kubernetes_ingress_v1.voice_app.status[0].load_balancer[0].ingress[0].hostname, "")
 }
