@@ -43,6 +43,23 @@ resource "aws_efs_mount_target" "this" {
   security_groups = [aws_security_group.efs.id]
 }
 
+resource "aws_efs_access_point" "this" {
+  file_system_id = aws_efs_file_system.this.id
+
+  root_directory {
+    path = "/efs"
+    creation_info {
+      owner_gid   = 1000
+      owner_uid   = 1000
+      permissions = "755"
+    }
+  }
+
+  tags = {
+    Name = "${var.environment}-efs-access-point"
+  }
+}
+
 
 
 

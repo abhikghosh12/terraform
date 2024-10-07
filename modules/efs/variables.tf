@@ -1,19 +1,21 @@
+# modules/efs/variables.tf
+
 variable "environment" {
-  description = "Environment name"
+  description = "The environment (e.g., dev, staging, prod)"
   type        = string
 }
 
 variable "vpc_id" {
-  description = "VPC ID"
+  description = "The ID of the VPC"
   type        = string
 }
 
 variable "vpc_cidr" {
-  description = "VPC CIDR block"
+  description = "The CIDR block of the VPC"
   type        = string
 }
 
 variable "subnet_ids" {
-  description = "List of subnet IDs"
+  description = "The IDs of the subnets where EFS mount targets will be created"
   type        = list(string)
 }
