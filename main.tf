@@ -1,6 +1,5 @@
 # main.tf
 
-
 module "vpc" {
   source             = "./modules/vpc"
   vpc_cidr           = var.vpc_cidr
@@ -19,33 +18,29 @@ module "eks" {
 }
 
 module "efs" {
-  source               = "./modules/efs"
-  vpc_id               = module.vpc.vpc_id
-  subnet_ids           = module.vpc.private_subnet_ids
-  eks_security_group_id = module.eks.cluster_security_group_id
+  source      = "./modules/efs"
+  vpc_id      = module.vpc.vpc_id
+  vpc_cidr    = var.vpc_cidr
+  subnet_ids  = module.vpc.private_subnet_ids
+  environment = var.environment
 
   depends_on = [module.eks]
 }
+
+# ... rest of the configuration remains the same
 
 resource "time_sleep" "wait_for_eks" {
   depends_on = [module.eks]
   create_duration = "1800s"
 }
 
-resource "local_file" "kubeconfig" {
-  content  = module.eks.kubeconfig
-  filename = "${path.module}/kubeconfig_${var.cluster_name}"
-
-  depends_on = [module.eks]
-}
-
 resource "null_resource" "wait_for_cluster" {
-  depends_on = [time_sleep.wait_for_eks, local_file.kubeconfig]
+  depends_on = [time_sleep.wait_for_eks]
 
   provisioner "local-exec" {
     command = <<EOF
       for i in {1..90}; do
-        if kubectl --kubeconfig=${local_file.kubeconfig.filename} get nodes; then
+        if aws eks get-token --cluster-name ${var.cluster_name} | kubectl get nodes; then
           echo "Cluster is ready!"
           exit 0
         fi
@@ -62,12 +57,22 @@ resource "null_resource" "install_efs_csi_driver" {
   depends_on = [null_resource.wait_for_cluster]
 
   provisioner "local-exec" {
-    command = "kubectl --kubeconfig=${local_file.kubeconfig.filename} apply -k \"github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.3\""
+    command = "kubectl apply -k \"github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.3\""
   }
 
-  # lifecycle {
-  #   create_before_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+module "k8s_resources" {
+  source               = "./modules/k8s_resources"
+  namespace            = var.namespace
+  efs_id               = module.efs.efs_id
+  uploads_storage_size = var.uploads_storage_size
+  output_storage_size  = var.output_storage_size
+
+  depends_on = [null_resource.install_efs_csi_driver]
 }
 
 module "voice_app" {
@@ -88,29 +93,3 @@ module "voice_app" {
 
   depends_on = [module.k8s_resources]
 }
-
-module "k8s_resources" {
-  source               = "./modules/k8s_resources"
-  namespace            = var.namespace
-  efs_id               = module.efs.efs_id
-  uploads_storage_size = var.uploads_storage_size
-  output_storage_size  = var.output_storage_size
-
-  depends_on = [module.eks]
-}
-
-# module "route53" {
-#   source      = "./modules/route53"
-#   domain_name = var.domain_name
-#   environment = var.environment
-# }
-
-# module "external_dns" {
-#   source          = "./modules/external_dns"
-#   cluster_name    = var.cluster_name
-#   domain_name     = var.domain_name
-#   route53_zone_id = module.route53.zone_id
-#   eks_depends_on  = module.eks.cluster_id
-
-#   depends_on = [module.eks, module.route53]
-# }

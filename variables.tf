@@ -53,6 +53,7 @@ variable "chart_path" {
   type        = string
   default     = "Charts/voice-app-0.1.0.tgz"
 }
+
 variable "webapp_image_tag" {
   description = "Docker image tag for the webapp"
   type        = string
@@ -100,8 +101,3 @@ variable "output_storage_size" {
   type        = string
   default     = "1Gi"
 }
-
-# variable "domain_name" {
-#   description = "Domain name for external DNS"
-#   type        = string
-# }

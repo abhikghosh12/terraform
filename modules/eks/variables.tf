@@ -13,7 +13,7 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "aws_region" {
+variable "region" {
   description = "AWS region"
   type        = string
   default     = "eu-central-1"
