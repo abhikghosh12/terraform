@@ -106,3 +106,9 @@ variable "kubernetes_version" {
   type        = string
   default     = "1.31"
 }
+
+variable "domain_name" {
+  description = "Domain name for the application"
+  type        = string
+  default     = "voice.app.com"
+}

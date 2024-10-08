@@ -86,7 +86,7 @@ module "voice_app" {
   webapp_replica_count        = var.webapp_replica_count
   worker_replica_count        = var.worker_replica_count
   ingress_enabled             = var.ingress_enabled
-  ingress_host                = var.ingress_host
+  ingress_host                = var.domain_name  # Use domain_name here
   storage_class_name          = "efs-sc"
   uploads_storage_size        = var.uploads_storage_size
   output_storage_size         = var.output_storage_size
@@ -107,4 +107,43 @@ resource "local_file" "kubeconfig" {
       certificate_authority_data = module.eks.cluster_ca_certificate
     }
   )
+}
+
+module "route53" {
+  source      = "./modules/route53"
+  domain_name = var.domain_name
+  environment = var.environment
+}
+
+module "external_dns" {
+  source          = "./modules/external_dns"
+  cluster_name    = var.cluster_name
+  domain_name     = var.domain_name
+  route53_zone_id = module.route53.zone_id
+  eks_depends_on  = module.eks.cluster_id
+
+  depends_on = [module.eks, module.route53]
+}
+
+
+module "nginx_ingress" {
+  source = "terraform-iaac/nginx-ingress/helm"
+
+  namespace        = "ingress-nginx"
+  create_namespace = true
+
+  additional_set = [
+    {
+      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+      value = "nlb"
+      type  = "string"
+    },
+    {
+      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-cross-zone-load-balancing-enabled"
+      value = "true"
+      type  = "string"
+    }
+  ]
+
+  depends_on = [module.eks]
 }

@@ -45,10 +45,3 @@ resource "aws_acm_certificate_validation" "main" {
   validation_record_fqdns = [for record in aws_route53_record.validation : record.fqdn]
 }
 
-output "zone_id" {
-  value = aws_route53_zone.main.zone_id
-}
-
-output "acm_certificate_arn" {
-  value = aws_acm_certificate.main.arn
-}
