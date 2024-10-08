@@ -1,0 +1,54 @@
+@startuml
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v15.0/dist
+!includeurl AWSPuml/AWSCommon.puml
+!includeurl AWSPuml/NetworkingAndContentDelivery/Route53.puml
+!includeurl AWSPuml/NetworkingAndContentDelivery/VPC.puml
+!includeurl AWSPuml/NetworkingAndContentDelivery/InternetGateway.puml
+!includeurl AWSPuml/NetworkingAndContentDelivery/NATGateway.puml
+!includeurl AWSPuml/Compute/ElasticKubernetesService.puml
+!includeurl AWSPuml/Storage/ElasticFileSystem.puml
+!includeurl AWSPuml/SecurityIdentityAndCompliance/CertificateManager.puml
+!includeurl AWSPuml/SecurityIdentityAndCompliance/IAM.puml
+
+skinparam linetype ortho
+
+Route53(route53, "Route 53", "DNS")
+InternetGateway(igw, "Internet Gateway", "")
+
+rectangle "VPC" {
+    VPC(vpc, "VPC", "10.0.0.0/16")
+    
+    rectangle "Public Subnets" {
+        NATGateway(nat, "NAT Gateway", "")
+        component "NGINX Ingress" as nginx
+    }
+    
+    rectangle "Private Subnets" {
+        ElasticKubernetesService(eks, "EKS Cluster", "")
+        ElasticFileSystem(efs, "EFS", "Persistent Storage")
+        
+        rectangle "Node Group" {
+            [EC2 Instances] as ec2
+        }
+    }
+}
+
+CertificateManager(acm, "ACM", "SSL/TLS Certificate")
+IAM(iam, "IAM", "Roles & Policies")
+component "External DNS" as externaldns
+
+route53 -down-> igw
+igw -down-> vpc
+
+vpc -down-> nat
+vpc -down-> nginx
+vpc -down-> eks
+vpc -down-> efs
+
+eks -right-> ec2
+
+acm -up-> vpc
+iam -up-> vpc
+externaldns -up-> vpc
+
+@enduml

@@ -87,7 +87,7 @@ variable "ingress_enabled" {
 variable "ingress_host" {
   description = "Ingress host"
   type        = string
-  default     = "voice.app.com"
+  default     = "voicesapp.net"
 }
 
 variable "uploads_storage_size" {
@@ -110,5 +110,5 @@ variable "kubernetes_version" {
 variable "domain_name" {
   description = "Domain name for the application"
   type        = string
-  default     = "voice.app.com"
+  default     = "voicesapp.net"
 }
