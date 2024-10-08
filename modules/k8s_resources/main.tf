@@ -52,24 +52,3 @@ resource "kubernetes_persistent_volume" "voice_app_pvs" {
     }
   }
 }
-
-resource "kubernetes_persistent_volume_claim" "voice_app_pvcs" {
-  for_each = { for idx, config in local.pv_configs : config.name => config }
-
-  metadata {
-    name      = each.key
-    namespace = kubernetes_namespace.voice_app.metadata[0].name
-  }
-  spec {
-    access_modes = ["ReadWriteMany"]
-    storage_class_name = kubernetes_storage_class.efs.metadata[0].name
-    volume_name = kubernetes_persistent_volume.voice_app_pvs[each.key].metadata[0].name
-    resources {
-      requests = {
-        storage = each.value.size
-      }
-    }
-  }
-
-  depends_on = [kubernetes_namespace.voice_app]
-}

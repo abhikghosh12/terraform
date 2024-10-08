@@ -68,8 +68,9 @@ module "k8s_resources" {
   source               = "./modules/k8s_resources"
   namespace            = var.namespace
   efs_id               = module.efs.efs_id
-  uploads_storage_size = var.uploads_storage_size
-  output_storage_size  = var.output_storage_size
+  uploads_storage_size       = var.uploads_storage_size
+  output_storage_size        = var.output_storage_size
+
 
   depends_on = [module.efs]
 }
@@ -88,6 +89,10 @@ module "voice_app" {
   ingress_enabled      = var.ingress_enabled
   ingress_host         = var.ingress_host
   storage_class_name   = "efs-sc"
+  uploads_storage_size       = var.uploads_storage_size
+  output_storage_size        = var.output_storage_size
+  redis_master_storage_size  = "1Gi"
+  redis_replicas_storage_size = "1Gi"
   pvc_dependencies     = module.k8s_resources.pvc_names
 
   depends_on = [module.k8s_resources]

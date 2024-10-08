@@ -1,15 +1,68 @@
 # modules/voice_app/main.tf
-# resource "kubernetes_namespace" "voice_app" {
-#   count = var.create_namespace ? 1 : 0
 
-#   metadata {
-#     name = var.namespace
-#   }
+resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
+  metadata {
+    name      = "voice-app-uploads"
+    namespace = var.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = var.storage_class_name
+    resources {
+      requests = {
+        storage = var.uploads_storage_size
+      }
+    }
+  }
+}
 
-#   lifecycle {
-#     ignore_changes = [metadata]
-#   }
-# }
+resource "kubernetes_persistent_volume_claim" "voice_app_output" {
+  metadata {
+    name      = "voice-app-output"
+    namespace = var.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = var.storage_class_name
+    resources {
+      requests = {
+        storage = var.output_storage_size
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "redis_master" {
+  metadata {
+    name      = "redis-master"
+    namespace = var.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = var.storage_class_name
+    resources {
+      requests = {
+        storage = var.redis_master_storage_size
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "redis_replicas" {
+  metadata {
+    name      = "redis-replicas"
+    namespace = var.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = var.storage_class_name
+    resources {
+      requests = {
+        storage = var.redis_replicas_storage_size
+      }
+    }
+  }
+}
 
 resource "helm_release" "voice_app" {
   name      = var.release_name
@@ -31,47 +84,29 @@ resource "helm_release" "voice_app" {
 
   set {
     name  = "persistence.uploads.existingClaim"
-    value = "voice-app-uploads"
+    value = kubernetes_persistent_volume_claim.voice_app_uploads.metadata[0].name
   }
 
   set {
     name  = "persistence.output.existingClaim"
-    value = "voice-app-output"
+    value = kubernetes_persistent_volume_claim.voice_app_output.metadata[0].name
   }
 
   set {
     name  = "redis.master.persistence.existingClaim"
-    value = "redis-master"
+    value = kubernetes_persistent_volume_claim.redis_master.metadata[0].name
   }
 
   set {
     name  = "redis.replica.persistence.existingClaim"
-    value = "redis-replicas"
-  }
-
-  # Tell Helm not to manage the PVCs
-  set {
-    name  = "persistence.uploads.createPVC"
-    value = "false"
-  }
-
-  set {
-    name  = "persistence.output.createPVC"
-    value = "false"
-  }
-
-  set {
-    name  = "redis.master.persistence.existingClaim"
-    value = "redis-master"
-  }
-
-  set {
-    name  = "redis.replica.persistence.existingClaim"
-    value = "redis-replicas"
+    value = kubernetes_persistent_volume_claim.redis_replicas.metadata[0].name
   }
 
   depends_on = [
-    var.pvc_dependencies
+    kubernetes_persistent_volume_claim.voice_app_uploads,
+    kubernetes_persistent_volume_claim.voice_app_output,
+    kubernetes_persistent_volume_claim.redis_master,
+    kubernetes_persistent_volume_claim.redis_replicas,
   ]
 
   lifecycle {
@@ -91,46 +126,3 @@ data "kubernetes_ingress_v1" "voice_app" {
 
   depends_on = [helm_release.voice_app]
 }
-
-# ... existing resources ...
-
-resource "kubernetes_persistent_volume_claim" "redis_master" {
-  metadata {
-    name      = "redis-data-voice-app-redis-master-0"
-    namespace = var.namespace
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    storage_class_name = "efs-sc"
-    volume_name = "pv-redis-data-voice-app-redis-master-0"
-    resources {
-      requests = {
-        storage = "1Gi"
-      }
-    }
-  }
-}
-
-resource "kubernetes_persistent_volume_claim" "redis_replicas" {
-  metadata {
-    name      = "redis-data-voice-app-redis-replicas-0"
-    namespace = var.namespace
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    storage_class_name = "efs-sc"
-    volume_name = "pv-redis-data-voice-app-redis-replicas-0"
-    resources {
-      requests = {
-        storage = "8Gi"
-      }
-    }
-  }
-}
-
-
-
-
-
-
-

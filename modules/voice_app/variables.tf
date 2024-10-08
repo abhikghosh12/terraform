@@ -66,3 +66,32 @@ variable "pvc_dependencies" {
   description = "List of PVC names that should exist before deploying the voice app"
   type        = list(string)
 }
+
+
+# modules/voice_app/variables.tf
+
+# ... (existing variables)
+
+variable "uploads_storage_size" {
+  description = "Storage size for uploads PVC"
+  type        = string
+  default     = "1Gi"
+}
+
+variable "output_storage_size" {
+  description = "Storage size for output PVC"
+  type        = string
+  default     = "1Gi"
+}
+
+variable "redis_master_storage_size" {
+  description = "Storage size for Redis master PVC"
+  type        = string
+  default     = "1Gi"
+}
+
+variable "redis_replicas_storage_size" {
+  description = "Storage size for Redis replicas PVC"
+  type        = string
+  default     = "1Gi"
+}
