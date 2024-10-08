@@ -93,7 +93,6 @@ module "voice_app" {
   output_storage_size        = var.output_storage_size
   redis_master_storage_size  = "1Gi"
   redis_replicas_storage_size = "1Gi"
-  pvc_dependencies     = module.k8s_resources.pvc_names
 
   depends_on = [module.k8s_resources]
 }
