@@ -1,15 +1,15 @@
 # modules/voice_app/main.tf
-resource "kubernetes_namespace" "voice_app" {
-  count = var.create_namespace ? 1 : 0
+# resource "kubernetes_namespace" "voice_app" {
+#   count = var.create_namespace ? 1 : 0
 
-  metadata {
-    name = var.namespace
-  }
+#   metadata {
+#     name = var.namespace
+#   }
 
-  lifecycle {
-    ignore_changes = [metadata]
-  }
-}
+#   lifecycle {
+#     ignore_changes = [metadata]
+#   }
+# }
 
 resource "helm_release" "voice_app" {
   name      = var.release_name
