@@ -101,3 +101,8 @@ variable "output_storage_size" {
   type        = string
   default     = "1Gi"
 }
+variable "kubernetes_version" {
+  description = "Kubernetes version to use for the EKS cluster"
+  type        = string
+  default     = "1.31"
+}

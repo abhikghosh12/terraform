@@ -25,6 +25,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
+  version  = var.kubernetes_version
 
   vpc_config {
     subnet_ids = var.subnet_ids
@@ -75,6 +76,7 @@ resource "aws_eks_node_group" "main" {
   node_group_name = "${var.cluster_name}-node-group"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = var.subnet_ids
+  version         = var.kubernetes_version
 
   scaling_config {
     desired_size = 2

@@ -23,6 +23,7 @@ module "efs" {
   vpc_cidr    = var.vpc_cidr
   subnet_ids  = module.vpc.private_subnet_ids
   environment = var.environment
+  kubernetes_version = var.kubernetes_version
 
   depends_on = [module.eks]
 }
@@ -57,7 +58,20 @@ resource "null_resource" "install_efs_csi_driver" {
   depends_on = [null_resource.wait_for_cluster]
 
   provisioner "local-exec" {
-    command = "kubectl apply -k \"github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.3\""
+    command = <<EOF
+      eksctl create iamserviceaccount \
+        --cluster=${var.cluster_name} \
+        --namespace=kube-system \
+        --name=efs-csi-controller-sa \
+        --role-name=EFS-CSI-DriverRole \
+        --role-only \
+        --attach-policy-arn=arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy \
+        --approve
+
+      helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver/
+      helm repo update
+      helm upgrade --install aws-efs-csi-driver --namespace kube-system aws-efs-csi-driver/aws-efs-csi-driver
+    EOF
   }
 
   lifecycle {
