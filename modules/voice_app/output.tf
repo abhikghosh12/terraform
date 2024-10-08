@@ -7,7 +7,18 @@ output "helm_release_id" {
   description = "The ID of the Helm release for the voice app"
 }
 
-output "ingress_host" {
-  value       = try(data.kubernetes_ingress_v1.voice_app.status[0].load_balancer[0].ingress[0].hostname, "")
-  description = "The hostname of the ingress for the voice app"
+output "release_name" {
+  description = "The name of the Helm release"
+  value       = helm_release.voice_app.name
+}
+
+output "release_status" {
+  description = "The status of the Helm release"
+  value       = helm_release.voice_app.status
+}
+
+
+output "namespace" {
+  description = "The namespace where the application is deployed"
+  value       = var.namespace
 }

@@ -122,6 +122,16 @@ resource "helm_release" "voice_app" {
     value = kubernetes_persistent_volume_claim.redis_replicas.metadata[0].name
   }
 
+  set {
+    name  = "ingress.enabled"
+    value = var.ingress_enabled
+  }
+
+  set {
+    name  = "ingress.host"
+    value = var.ingress_host
+  }
+  
   depends_on = [
     kubernetes_persistent_volume_claim.voice_app_uploads,
     kubernetes_persistent_volume_claim.voice_app_output,
