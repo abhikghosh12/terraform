@@ -1,5 +1,11 @@
 # modules/k8s_resources/main.tf
 
+resource "kubernetes_namespace" "voice_app" {
+  metadata {
+    name = var.namespace
+  }
+}
+
 resource "kubernetes_storage_class" "efs" {
   metadata {
     name = "efs-sc"
