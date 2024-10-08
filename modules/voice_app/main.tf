@@ -5,6 +5,10 @@ resource "kubernetes_namespace" "voice_app" {
   metadata {
     name = var.namespace
   }
+
+  lifecycle {
+    ignore_changes = [metadata]
+  }
 }
 
 resource "helm_release" "voice_app" {

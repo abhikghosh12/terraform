@@ -4,6 +4,10 @@ resource "kubernetes_namespace" "voice_app" {
   metadata {
     name = var.namespace
   }
+
+  lifecycle {
+    ignore_changes = [metadata]
+  } 
 }
 
 resource "kubernetes_storage_class" "efs" {
