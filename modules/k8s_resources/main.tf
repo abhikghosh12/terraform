@@ -7,7 +7,7 @@ resource "kubernetes_namespace" "voice_app" {
 
   lifecycle {
     ignore_changes = [metadata]
-  } 
+  }
 }
 
 resource "kubernetes_storage_class" "efs" {
@@ -26,6 +26,8 @@ locals {
   pv_configs = [
     { name = "voice-app-uploads", size = var.uploads_storage_size },
     { name = "voice-app-output", size = var.output_storage_size },
+    { name = "redis-master", size = "1Gi" },
+    { name = "redis-replicas", size = "1Gi" },
   ]
 }
 
@@ -56,7 +58,7 @@ resource "kubernetes_persistent_volume_claim" "voice_app_pvcs" {
 
   metadata {
     name      = each.key
-    namespace = var.namespace
+    namespace = kubernetes_namespace.voice_app.metadata[0].name
   }
   spec {
     access_modes = ["ReadWriteMany"]
@@ -68,48 +70,6 @@ resource "kubernetes_persistent_volume_claim" "voice_app_pvcs" {
       }
     }
   }
-}
 
-# modules/k8s_resources/main.tf
-
-# ... existing resources ...
-
-resource "kubernetes_persistent_volume" "redis_master" {
-  metadata {
-    name = "pv-redis-data-voice-app-redis-master-0"
-  }
-  spec {
-    capacity = {
-      storage = "1Gi"
-    }
-    access_modes = ["ReadWriteOnce"]
-    storage_class_name = "efs-sc"
-    persistent_volume_reclaim_policy = "Retain"
-    persistent_volume_source {
-      csi {
-        driver = "efs.csi.aws.com"
-        volume_handle = "${var.efs_id}:/redis-master"
-      }
-    }
-  }
-}
-
-resource "kubernetes_persistent_volume" "redis_replicas" {
-  metadata {
-    name = "pv-redis-data-voice-app-redis-replicas-0"
-  }
-  spec {
-    capacity = {
-      storage = "8Gi"
-    }
-    access_modes = ["ReadWriteOnce"]
-    storage_class_name = "efs-sc"
-    persistent_volume_reclaim_policy = "Retain"
-    persistent_volume_source {
-      csi {
-        driver = "efs.csi.aws.com"
-        volume_handle = "${var.efs_id}:/redis-replicas"
-      }
-    }
-  }
+  depends_on = [kubernetes_namespace.voice_app]
 }

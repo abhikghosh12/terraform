@@ -49,6 +49,27 @@ resource "helm_release" "voice_app" {
     value = "redis-replicas"
   }
 
+  # Tell Helm not to manage the PVCs
+  set {
+    name  = "persistence.uploads.createPVC"
+    value = "false"
+  }
+
+  set {
+    name  = "persistence.output.createPVC"
+    value = "false"
+  }
+
+  set {
+    name  = "redis.master.persistence.existingClaim"
+    value = "redis-master"
+  }
+
+  set {
+    name  = "redis.replica.persistence.existingClaim"
+    value = "redis-replicas"
+  }
+
   depends_on = [
     var.pvc_dependencies
   ]
@@ -57,6 +78,7 @@ resource "helm_release" "voice_app" {
     ignore_changes = [
       values,
       version,
+      set,
     ]
   }
 }
