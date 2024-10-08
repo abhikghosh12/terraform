@@ -76,22 +76,21 @@ module "k8s_resources" {
 }
 
 module "voice_app" {
-  source               = "./modules/voice_app"
-  namespace            = var.namespace
-  create_namespace     = true
-  release_name         = var.release_name
-  chart_path           = "${path.root}/${var.chart_path}"
-  chart_version        = var.chart_version
-  webapp_image_tag     = var.webapp_image_tag
-  worker_image_tag     = var.worker_image_tag
-  webapp_replica_count = var.webapp_replica_count
-  worker_replica_count = var.worker_replica_count
-  ingress_enabled      = var.ingress_enabled
-  ingress_host         = var.ingress_host
-  storage_class_name   = "efs-sc"
-  uploads_storage_size       = var.uploads_storage_size
-  output_storage_size        = var.output_storage_size
-  redis_master_storage_size  = "1Gi"
+  source                      = "./modules/voice_app"
+  namespace                   = var.namespace
+  release_name                = var.release_name
+  chart_path                  = "${path.root}/${var.chart_path}"
+  chart_version               = var.chart_version
+  webapp_image_tag            = var.webapp_image_tag
+  worker_image_tag            = var.worker_image_tag
+  webapp_replica_count        = var.webapp_replica_count
+  worker_replica_count        = var.worker_replica_count
+  ingress_enabled             = var.ingress_enabled
+  ingress_host                = var.ingress_host
+  storage_class_name          = "efs-sc"
+  uploads_storage_size        = var.uploads_storage_size
+  output_storage_size         = var.output_storage_size
+  redis_master_storage_size   = "1Gi"
   redis_replicas_storage_size = "1Gi"
 
   depends_on = [module.k8s_resources]

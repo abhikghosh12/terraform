@@ -6,7 +6,7 @@ resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
     namespace = var.namespace
   }
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes       = ["ReadWriteMany"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
@@ -22,7 +22,7 @@ resource "kubernetes_persistent_volume_claim" "voice_app_output" {
     namespace = var.namespace
   }
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes       = ["ReadWriteMany"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
@@ -38,7 +38,7 @@ resource "kubernetes_persistent_volume_claim" "redis_master" {
     namespace = var.namespace
   }
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes       = ["ReadWriteOnce"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
@@ -54,7 +54,7 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
     namespace = var.namespace
   }
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes       = ["ReadWriteOnce"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
@@ -81,6 +81,26 @@ resource "helm_release" "voice_app" {
       storage_class_name   = var.storage_class_name
     })
   ]
+
+  set {
+    name  = "persistence.uploads.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "persistence.output.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "redis.master.persistence.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "redis.replica.persistence.enabled"
+    value = "false"
+  }
 
   set {
     name  = "persistence.uploads.existingClaim"
@@ -116,13 +136,4 @@ resource "helm_release" "voice_app" {
       set,
     ]
   }
-}
-
-data "kubernetes_ingress_v1" "voice_app" {
-  metadata {
-    name      = "${var.release_name}-ingress"
-    namespace = var.namespace
-  }
-
-  depends_on = [helm_release.voice_app]
 }
