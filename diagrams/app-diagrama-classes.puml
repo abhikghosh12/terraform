@@ -1,54 +1,42 @@
 @startuml
-!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v15.0/dist
-!includeurl AWSPuml/AWSCommon.puml
-!includeurl AWSPuml/NetworkingAndContentDelivery/Route53.puml
-!includeurl AWSPuml/NetworkingAndContentDelivery/VPC.puml
-!includeurl AWSPuml/NetworkingAndContentDelivery/InternetGateway.puml
-!includeurl AWSPuml/NetworkingAndContentDelivery/NATGateway.puml
-!includeurl AWSPuml/Compute/ElasticKubernetesService.puml
-!includeurl AWSPuml/Storage/ElasticFileSystem.puml
-!includeurl AWSPuml/SecurityIdentityAndCompliance/CertificateManager.puml
-!includeurl AWSPuml/SecurityIdentityAndCompliance/IAM.puml
+!define RECTANGLE
+!define CLOUD
 
 skinparam linetype ortho
 
-Route53(route53, "Route 53", "DNS")
-InternetGateway(igw, "Internet Gateway", "")
+cloud "Route 53" as route53
+rectangle "Internet Gateway" as igw
 
 rectangle "VPC" {
-    VPC(vpc, "VPC", "10.0.0.0/16")
-    
     rectangle "Public Subnets" {
-        NATGateway(nat, "NAT Gateway", "")
-        component "NGINX Ingress" as nginx
+        rectangle "NAT Gateway" as nat
+        rectangle "NGINX Ingress" as nginx
     }
     
     rectangle "Private Subnets" {
-        ElasticKubernetesService(eks, "EKS Cluster", "")
-        ElasticFileSystem(efs, "EFS", "Persistent Storage")
-        
-        rectangle "Node Group" {
-            [EC2 Instances] as ec2
+        rectangle "EKS Cluster" as eks {
+            rectangle "Node Group" {
+                rectangle "EC2 Instances" as ec2
+            }
         }
+        rectangle "EFS" as efs
     }
 }
 
-CertificateManager(acm, "ACM", "SSL/TLS Certificate")
-IAM(iam, "IAM", "Roles & Policies")
-component "External DNS" as externaldns
+rectangle "ACM" as acm
+rectangle "IAM" as iam
+rectangle "External DNS" as externaldns
 
 route53 -down-> igw
-igw -down-> vpc
+igw -down-> VPC
 
-vpc -down-> nat
-vpc -down-> nginx
-vpc -down-> eks
-vpc -down-> efs
+VPC -down-> nat
+VPC -down-> nginx
+VPC -down-> eks
+VPC -down-> efs
 
-eks -right-> ec2
-
-acm -up-> vpc
-iam -up-> vpc
-externaldns -up-> vpc
+acm -up-> VPC
+iam -up-> VPC
+externaldns -up-> VPC
 
 @enduml
