@@ -35,38 +35,9 @@ resource "time_sleep" "wait_for_eks" {
   create_duration = "1800s"
 }
 
-resource "null_resource" "wait_for_cluster" {
-  depends_on = [module.eks]
-
-  provisioner "local-exec" {
-    command = <<EOF
-      for i in {1..90}; do
-        CLUSTER_STATUS=$(aws eks describe-cluster --name ${var.cluster_name} --query 'cluster.status' --output text)
-        if [ "$CLUSTER_STATUS" == "ACTIVE" ]; then
-          echo "Cluster is active, checking for nodes..."
-          
-          NODE_COUNT=$(aws eks list-nodegroups --cluster-name ${var.cluster_name} --query 'nodegroups[0]' --output text | xargs -I {} aws eks describe-nodegroup --cluster-name ${var.cluster_name} --nodegroup-name {} --query 'nodegroup.scalingConfig.desiredSize' --output text)
-          
-          if [ "$NODE_COUNT" -gt 0 ]; then
-            READY_NODES=$(aws eks list-nodegroups --cluster-name ${var.cluster_name} --query 'nodegroups[0]' --output text | xargs -I {} aws eks describe-nodegroup --cluster-name ${var.cluster_name} --nodegroup-name {} --query 'nodegroup.health.issues[?code==`NodeCreationFailure`].message' --output text)
-            
-            if [ -z "$READY_NODES" ]; then
-              echo "Nodes are ready. Cluster is fully operational!"
-              exit 0
-            fi
-          fi
-        fi
-        echo "Waiting for EKS cluster to be ready... (Attempt $i/90)"
-        sleep 30
-      done
-      echo "Timeout waiting for EKS cluster"
-      exit 1
-    EOF
-  }
-}
 
 resource "null_resource" "install_efs_csi_driver" {
-  depends_on = [null_resource.wait_for_cluster]
+
 
   provisioner "local-exec" {
     command = <<EOF
@@ -119,13 +90,3 @@ module "voice_app" {
   depends_on = [module.k8s_resources]
 }
 
-
-resource "local_file" "kubeconfig" {
-  depends_on = [null_resource.wait_for_cluster]
-  filename = "${path.root}/kubeconfig_${var.cluster_name}"
-  content = templatefile("${path.module}/kubeconfig.tpl", {
-    cluster_name = var.cluster_name
-    endpoint = module.eks.cluster_endpoint
-    certificate_authority_data = module.eks.cluster_ca_certificate
-  })
-}
