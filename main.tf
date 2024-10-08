@@ -125,12 +125,19 @@ module "external_dns" {
   depends_on = [module.eks, module.route53]
 }
 
+resource "kubernetes_namespace" "ingress_nginx" {
+  metadata {
+    name = "ingress-nginx"
+  }
+
+  depends_on = [module.eks, null_resource.wait_for_cluster]
+}
 
 resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
-  namespace  = "ingress-nginx"
+  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
   version    = "4.7.1"  # Use the latest stable version
 
   set {
@@ -148,5 +155,5 @@ resource "helm_release" "nginx_ingress" {
     value = "true"
   }
 
-  depends_on = [module.eks]
+  depends_on = [kubernetes_namespace.ingress_nginx]
 }
