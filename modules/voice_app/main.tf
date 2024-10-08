@@ -50,7 +50,6 @@ resource "helm_release" "voice_app" {
   }
 
   depends_on = [
-    kubernetes_namespace.voice_app,
     var.pvc_dependencies
   ]
 
