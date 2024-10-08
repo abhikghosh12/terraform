@@ -124,9 +124,12 @@ resource "null_resource" "wait_for_cluster" {
 resource "local_file" "kubeconfig" {
   depends_on = [null_resource.wait_for_cluster]
   filename = "${path.root}/kubeconfig_${var.cluster_name}"
-  content = templatefile("${path.root}/kubeconfig.tpl", {
-    cluster_name = var.cluster_name
-    endpoint = module.eks.cluster_endpoint
-    certificate_authority_data = module.eks.cluster_ca_certificate
-  })
+  content = templatefile(
+    "${path.root}/modules/eks/kubeconfig.tpl",
+    {
+      cluster_name                = var.cluster_name
+      endpoint                    = module.eks.cluster_endpoint
+      certificate_authority_data  = module.eks.cluster_ca_certificate
+    }
+  )
 }
