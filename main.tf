@@ -126,24 +126,27 @@ module "external_dns" {
 }
 
 
-module "nginx_ingress" {
-  source = "terraform-iaac/nginx-ingress/helm"
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "ingress-nginx"
+  version    = "4.7.1"  # Use the latest stable version
 
-  namespace        = "ingress-nginx"
-  create_namespace = true
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
+  }
 
-  additional_set = [
-    {
-      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
-      value = "nlb"
-      type  = "string"
-    },
-    {
-      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-cross-zone-load-balancing-enabled"
-      value = "true"
-      type  = "string"
-    }
-  ]
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+    value = "nlb"
+  }
+
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-cross-zone-load-balancing-enabled"
+    value = "true"
+  }
 
   depends_on = [module.eks]
 }
