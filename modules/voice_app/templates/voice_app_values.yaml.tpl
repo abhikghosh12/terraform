@@ -26,10 +26,14 @@ redis:
     persistence:
       enabled: true                # Enable persistence
       size: 1Gi                    # Size of the volume
-      storageClassName: ""         # Specify your storage class here      
+      storageClassName: ""
+      existingClaim: redis-data-voice-app-redis-master-0        # Specify your storage class here      
   auth:
     enabled: false                # Disable Redis authentication
   replica:
+    persistence:
+      enabled: true
+      existingClaim: redis-data-voice-app-redis-replicas-0  
     kind: StatefulSet             # Use StatefulSet for Redis replicas
     replicaCount: 2
 

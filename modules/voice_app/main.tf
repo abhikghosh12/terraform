@@ -67,6 +67,41 @@ data "kubernetes_ingress_v1" "voice_app" {
   depends_on = [helm_release.voice_app]
 }
 
+# ... existing resources ...
+
+resource "kubernetes_persistent_volume_claim" "redis_master" {
+  metadata {
+    name      = "redis-data-voice-app-redis-master-0"
+    namespace = var.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    storage_class_name = "efs-sc"
+    volume_name = "pv-redis-data-voice-app-redis-master-0"
+    resources {
+      requests = {
+        storage = "1Gi"
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "redis_replicas" {
+  metadata {
+    name      = "redis-data-voice-app-redis-replicas-0"
+    namespace = var.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    storage_class_name = "efs-sc"
+    volume_name = "pv-redis-data-voice-app-redis-replicas-0"
+    resources {
+      requests = {
+        storage = "8Gi"
+      }
+    }
+  }
+}
 
 
 
