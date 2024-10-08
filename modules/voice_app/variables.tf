@@ -62,16 +62,6 @@ variable "create_namespace" {
   default     = true
 }
 
-variable "pvc_dependencies" {
-  description = "List of PVC names that should exist before deploying the voice app"
-  type        = list(string)
-}
-
-
-# modules/voice_app/variables.tf
-
-# ... (existing variables)
-
 variable "uploads_storage_size" {
   description = "Storage size for uploads PVC"
   type        = string
