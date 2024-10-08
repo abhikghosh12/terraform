@@ -20,4 +20,3 @@ output "efs_security_group_id" {
   description = "ID of the EFS security group"
 }
 
-
