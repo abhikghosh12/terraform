@@ -13,7 +13,7 @@ resource "aws_route53_zone" "main" {
 }
 
 locals {
-  zone_id = aws_route53_zone.main[0].zone_id 
+  zone_id = aws_route53_zone.main.zone_id
 }
 
 resource "aws_acm_certificate" "main" {
@@ -75,7 +75,6 @@ resource "aws_route53_record" "www_cname" {
   ttl     = 300
   records = [var.domain_name]
 }
-
 
 
 
