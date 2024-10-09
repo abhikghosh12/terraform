@@ -1,5 +1,4 @@
 # main.tf
-
 module "vpc" {
   source             = "./modules/vpc"
   vpc_cidr           = var.vpc_cidr
@@ -132,7 +131,7 @@ resource "helm_release" "nginx_ingress" {
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
   namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
-  version    = "4.7.1"  # Use the latest stable version
+  version    = "4.7.1"
 
   set {
     name  = "controller.service.type"
@@ -149,7 +148,7 @@ resource "helm_release" "nginx_ingress" {
     value = "true"
   }
 
-  depends_on = [kubernetes_namespace.ingress_nginx]
+  depends_on = [module.eks, kubernetes_namespace.ingress_nginx]
 }
 
 data "kubernetes_service" "nginx_ingress" {
@@ -161,10 +160,12 @@ data "kubernetes_service" "nginx_ingress" {
   depends_on = [helm_release.nginx_ingress]
 }
 
+data "aws_elb_hosted_zone_id" "main" {}
+
 module "route53" {
   source                 = "./modules/route53"
   domain_name            = "voicesapp.net"
   environment            = var.environment
-  load_balancer_dns_name = module.eks.load_balancer_dns_name
-  load_balancer_zone_id  = module.eks.load_balancer_zone_id
+  load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
+  load_balancer_zone_id  = data.aws_elb_hosted_zone_id.main.id
 }
