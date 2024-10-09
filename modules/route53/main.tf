@@ -41,7 +41,7 @@ resource "aws_acm_certificate_validation" "main" {
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 
   timeouts {
-    create = "3h"
+    create = "15m"
   }
 }
 
@@ -64,4 +64,3 @@ resource "aws_route53_record" "www_cname" {
   ttl     = 300
   records = [var.domain_name]
 }
-

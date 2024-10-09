@@ -179,11 +179,7 @@ resource "kubernetes_ingress_v1" "voice_app" {
   }
 
   lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-      metadata[0].labels,
-      spec[0].rule,
-    ]
+    ignore_changes = all
   }
 }
 

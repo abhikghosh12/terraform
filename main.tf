@@ -170,7 +170,7 @@ resource "time_sleep" "wait_for_loadbalancer" {
 
 module "route53" {
   source                 = "./modules/route53"
-  domain_name            = "voicesapp.net"
+  domain_name            = var.domain_name
   environment            = var.environment
   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
   load_balancer_zone_id  = data.aws_elb_hosted_zone_id.main.id
