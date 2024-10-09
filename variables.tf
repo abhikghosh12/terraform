@@ -118,3 +118,9 @@ variable "create_ingress" {
   type        = bool
   default     = false
 }
+
+variable "create_route53_zone" {
+  description = "create route 53 "
+  type        = bool
+  default     = true
+}

@@ -23,5 +23,4 @@ variable "load_balancer_zone_id" {
 variable "create_route53_zone" {
   type        = bool
   description = "Whether to create a new Route53 zone or use an existing one"
-  default     = false
 }

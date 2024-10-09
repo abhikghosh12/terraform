@@ -180,7 +180,7 @@ module "route53" {
   environment            = var.environment
   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
   load_balancer_zone_id  = data.aws_lb.nginx_ingress.zone_id
-  create_route53_zone    = true  # Set this to true if you want to create a new zone
+  create_route53_zone    = var.create_route53_zone  # Set this to true if you want to create a new zone
 
   depends_on = [time_sleep.wait_for_loadbalancer]
 }
