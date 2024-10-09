@@ -153,7 +153,7 @@ resource "helm_release" "nginx_ingress" {
 
 data "kubernetes_service" "nginx_ingress" {
   metadata {
-    name      = "${helm_release.nginx_ingress.name}-controller"
+    name      = "${helm_release.nginx_ingress.name}-ingress-nginx-controller"
     namespace = kubernetes_namespace.ingress_nginx.metadata[0].name
   }
 
@@ -162,10 +162,18 @@ data "kubernetes_service" "nginx_ingress" {
 
 data "aws_elb_hosted_zone_id" "main" {}
 
+# Add a time_sleep resource to allow time for the load balancer to be created
+resource "time_sleep" "wait_for_loadbalancer" {
+  depends_on = [helm_release.nginx_ingress]
+  create_duration = "900s"
+}
+
 module "route53" {
   source                 = "./modules/route53"
   domain_name            = "voicesapp.net"
   environment            = var.environment
   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
   load_balancer_zone_id  = data.aws_elb_hosted_zone_id.main.id
+
+  depends_on = [time_sleep.wait_for_loadbalancer]
 }
