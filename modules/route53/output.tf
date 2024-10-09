@@ -1,15 +1,15 @@
-output "zone_id" {
-  value = aws_route53_zone.main.zone_id
+output "certificate_status" {
+  value = aws_acm_certificate.main.status
 }
 
-output "acm_certificate_arn" {
-  value = aws_acm_certificate.main.arn
+output "zone_id" {
+  value = data.aws_route53_zone.existing.zone_id
 }
 
 output "name_servers" {
-  value = aws_route53_zone.main.name_servers
+  value = data.aws_route53_zone.existing.name_servers
 }
 
-output "certificate_status" {
-  value = aws_acm_certificate.main.status
+output "certificate_arn" {
+  value = aws_acm_certificate.main.arn
 }

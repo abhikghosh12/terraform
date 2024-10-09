@@ -110,9 +110,11 @@ resource "local_file" "kubeconfig" {
 }
 
 module "route53" {
-  source      = "./modules/route53"
-  domain_name = var.domain_name
-  environment = var.environment
+  source                 = "./modules/route53"
+  domain_name            = "voicesapp.net"
+  environment            = var.environment
+  load_balancer_dns_name = module.eks.load_balancer_dns_name
+  load_balancer_zone_id  = module.eks.load_balancer_zone_id
 }
 
 module "external_dns" {
