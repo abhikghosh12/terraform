@@ -34,3 +34,19 @@ output "oidc_provider_arn" {
 output "cluster_id" {
   value = aws_eks_cluster.main.id
 }
+
+data "kubernetes_service" "nginx_ingress" {
+  metadata {
+    name      = "nginx-ingress-controller"
+    namespace = "ingress-nginx"
+  }
+  depends_on = [helm_release.nginx_ingress]
+}
+
+output "load_balancer_dns_name" {
+  value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
+}
+
+output "load_balancer_zone_id" {
+  value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
+}

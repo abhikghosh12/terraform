@@ -147,3 +147,35 @@ resource "helm_release" "voice_app" {
     ]
   }
 }
+
+
+resource "kubernetes_ingress_v1" "voice_app" {
+  metadata {
+    name      = "voice-app-ingress"
+    namespace = var.namespace
+    annotations = {
+      "kubernetes.io/ingress.class" = "nginx"
+      "nginx.ingress.kubernetes.io/ssl-redirect" = "false"
+    }
+  }
+
+  spec {
+    rule {
+      host = var.ingress_host
+      http {
+        path {
+          path = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "voice-app-service"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

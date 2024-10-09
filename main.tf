@@ -116,7 +116,6 @@ module "route53" {
   load_balancer_dns_name = module.eks.load_balancer_dns_name
   load_balancer_zone_id  = module.eks.load_balancer_zone_id
 }
-
 module "external_dns" {
   source          = "./modules/external_dns"
   cluster_name    = var.cluster_name
