@@ -109,13 +109,6 @@ resource "local_file" "kubeconfig" {
   )
 }
 
-module "route53" {
-  source                 = "./modules/route53"
-  domain_name            = "voicesapp.net"
-  environment            = var.environment
-  load_balancer_dns_name = module.eks.load_balancer_dns_name
-  load_balancer_zone_id  = module.eks.load_balancer_zone_id
-}
 module "external_dns" {
   source          = "./modules/external_dns"
   cluster_name    = var.cluster_name
@@ -157,4 +150,21 @@ resource "helm_release" "nginx_ingress" {
   }
 
   depends_on = [kubernetes_namespace.ingress_nginx]
+}
+
+data "kubernetes_service" "nginx_ingress" {
+  metadata {
+    name      = "${helm_release.nginx_ingress.name}-controller"
+    namespace = kubernetes_namespace.ingress_nginx.metadata[0].name
+  }
+
+  depends_on = [helm_release.nginx_ingress]
+}
+
+module "route53" {
+  source                 = "./modules/route53"
+  domain_name            = "voicesapp.net"
+  environment            = var.environment
+  load_balancer_dns_name = module.eks.load_balancer_dns_name
+  load_balancer_zone_id  = module.eks.load_balancer_zone_id
 }
