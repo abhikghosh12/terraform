@@ -1,22 +1,19 @@
 # modules/route53/main.tf
 
 resource "aws_route53_zone" "main" {
-  count = var.create_route53_zone ? 1 : 0
-  name  = var.domain_name
+  name = var.domain_name
 
   tags = {
     Environment = var.environment
   }
-}
 
-data "aws_route53_zone" "existing" {
-  count        = var.create_route53_zone ? 0 : 1
-  name         = var.domain_name
-  private_zone = false
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 locals {
-  zone_id = var.create_route53_zone ? aws_route53_zone.main[0].zone_id : data.aws_route53_zone.existing[0].zone_id
+  zone_id = aws_route53_zone.main[0].zone_id 
 }
 
 resource "aws_acm_certificate" "main" {

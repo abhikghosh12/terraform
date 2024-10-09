@@ -19,8 +19,3 @@ variable "load_balancer_zone_id" {
   type        = string
   description = "Zone ID of the load balancer"
 }
-
-variable "create_route53_zone" {
-  type        = bool
-  description = "Whether to create a new Route53 zone or use an existing one"
-}

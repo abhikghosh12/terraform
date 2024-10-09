@@ -18,5 +18,5 @@ output "zone_id" {
 }
 
 output "name_servers" {
-  value = var.create_route53_zone ? aws_route53_zone.main[0].name_servers : data.aws_route53_zone.existing[0].name_servers
+  value = aws_route53_zone.main[0].name_servers
 }
