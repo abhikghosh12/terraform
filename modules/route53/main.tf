@@ -79,10 +79,4 @@ resource "aws_route53_record" "www_cname" {
   records = [var.domain_name]
 }
 
-output "zone_id" {
-  value = local.zone_id
-}
 
-output "name_servers" {
-  value = var.create_route53_zone ? aws_route53_zone.main[0].name_servers : data.aws_route53_zone.existing[0].name_servers
-}
