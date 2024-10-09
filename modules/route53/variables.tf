@@ -2,7 +2,7 @@
 
 variable "domain_name" {
   type        = string
-  description = "The domain name"
+  description = "The domain name for the Route53 zone"
 }
 
 variable "environment" {
@@ -18,4 +18,10 @@ variable "load_balancer_dns_name" {
 variable "load_balancer_zone_id" {
   type        = string
   description = "Zone ID of the load balancer"
+}
+
+variable "create_route53_zone" {
+  type        = bool
+  description = "Whether to create a new Route53 zone or use an existing one"
+  default     = false
 }

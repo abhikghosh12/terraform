@@ -1,8 +1,22 @@
 # modules/route53/main.tf
 
+resource "aws_route53_zone" "main" {
+  count = var.create_route53_zone ? 1 : 0
+  name  = var.domain_name
+
+  tags = {
+    Environment = var.environment
+  }
+}
+
 data "aws_route53_zone" "existing" {
+  count        = var.create_route53_zone ? 0 : 1
   name         = var.domain_name
   private_zone = false
+}
+
+locals {
+  zone_id = var.create_route53_zone ? aws_route53_zone.main[0].zone_id : data.aws_route53_zone.existing[0].zone_id
 }
 
 resource "aws_acm_certificate" "main" {
@@ -33,7 +47,7 @@ resource "aws_route53_record" "cert_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = data.aws_route53_zone.existing.zone_id
+  zone_id         = local.zone_id
 }
 
 resource "aws_acm_certificate_validation" "main" {
@@ -46,7 +60,7 @@ resource "aws_acm_certificate_validation" "main" {
 }
 
 resource "aws_route53_record" "root_a" {
-  zone_id = data.aws_route53_zone.existing.zone_id
+  zone_id = local.zone_id
   name    = var.domain_name
   type    = "A"
 
@@ -58,9 +72,17 @@ resource "aws_route53_record" "root_a" {
 }
 
 resource "aws_route53_record" "www_cname" {
-  zone_id = data.aws_route53_zone.existing.zone_id
+  zone_id = local.zone_id
   name    = "www.${var.domain_name}"
   type    = "CNAME"
   ttl     = 300
   records = [var.domain_name]
+}
+
+output "zone_id" {
+  value = local.zone_id
+}
+
+output "name_servers" {
+  value = var.create_route53_zone ? aws_route53_zone.main[0].name_servers : data.aws_route53_zone.existing[0].name_servers
 }

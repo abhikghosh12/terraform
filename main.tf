@@ -174,6 +174,7 @@ module "route53" {
   environment            = var.environment
   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
   load_balancer_zone_id  = data.aws_elb_hosted_zone_id.main.id
+  create_route53_zone    = true  # Set this to true if you want to create a new zone
 
   depends_on = [time_sleep.wait_for_loadbalancer]
 }
