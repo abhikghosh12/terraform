@@ -165,7 +165,7 @@ data "aws_elb_hosted_zone_id" "main" {}
 # Add a time_sleep resource to allow time for the load balancer to be created
 resource "time_sleep" "wait_for_loadbalancer" {
   depends_on = [helm_release.nginx_ingress]
-  create_duration = "900s"
+  create_duration = "300s"
 }
 
 module "route53" {
