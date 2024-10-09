@@ -169,13 +169,18 @@ resource "time_sleep" "wait_for_loadbalancer" {
   create_duration = "300s"
 }
 
+
+data "aws_lb" "nginx_ingress" {
+  name = split("-", data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname)[0]
+}
+
 module "route53" {
   source                 = "./modules/route53"
   domain_name            = var.domain_name
   environment            = var.environment
   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
-  load_balancer_zone_id  = data.aws_elb_hosted_zone_id.main.id
-  create_route53_zone    = false  # Set this to true if you want to create a new zone
+  load_balancer_zone_id  = data.aws_lb.nginx_ingress.zone_id
+  create_route53_zone    = true  # Set this to true if you want to create a new zone
 
   depends_on = [time_sleep.wait_for_loadbalancer]
 }

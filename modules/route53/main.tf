@@ -69,8 +69,6 @@ resource "aws_route53_record" "root_a" {
     zone_id                = var.load_balancer_zone_id
     evaluate_target_health = true
   }
-
-  allow_overwrite = true
 }
 
 resource "aws_route53_record" "www_cname" {
@@ -79,9 +77,8 @@ resource "aws_route53_record" "www_cname" {
   type    = "CNAME"
   ttl     = 300
   records = [var.domain_name]
-
-  allow_overwrite = true
 }
+
 
 
 
