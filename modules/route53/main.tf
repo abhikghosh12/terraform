@@ -34,10 +34,6 @@ resource "aws_route53_record" "cert_validation" {
   ttl             = 60
   type            = each.value.type
   zone_id         = data.aws_route53_zone.existing.zone_id
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_acm_certificate_validation" "main" {
@@ -46,10 +42,6 @@ resource "aws_acm_certificate_validation" "main" {
 
   timeouts {
     create = "3h"
-  }
-
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
@@ -63,10 +55,6 @@ resource "aws_route53_record" "root_a" {
     zone_id                = var.load_balancer_zone_id
     evaluate_target_health = true
   }
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_route53_record" "www_cname" {
@@ -75,9 +63,5 @@ resource "aws_route53_record" "www_cname" {
   type    = "CNAME"
   ttl     = 300
   records = [var.domain_name]
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
