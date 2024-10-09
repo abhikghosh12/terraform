@@ -149,6 +149,8 @@ resource "helm_release" "voice_app" {
 }
 
 resource "kubernetes_ingress_v1" "voice_app" {
+  count = var.create_ingress ? 1 : 0
+
   metadata {
     name      = "voice-app-ingress"
     namespace = var.namespace

@@ -85,3 +85,9 @@ variable "redis_replicas_storage_size" {
   type        = string
   default     = "1Gi"
 }
+
+variable "create_ingress" {
+  description = "Enable ingress"
+  type        = bool
+  default     = false
+}

@@ -85,14 +85,15 @@ module "voice_app" {
   webapp_replica_count        = var.webapp_replica_count
   worker_replica_count        = var.worker_replica_count
   ingress_enabled             = var.ingress_enabled
-  ingress_host                = var.domain_name  # Use domain_name here
+  ingress_host                = var.domain_name
   storage_class_name          = "efs-sc"
   uploads_storage_size        = var.uploads_storage_size
   output_storage_size         = var.output_storage_size
   redis_master_storage_size   = "1Gi"
   redis_replicas_storage_size = "1Gi"
+  create_ingress              = false  # Set this to false to avoid creating the Ingress resource
 
-  depends_on = [module.k8s_resources]
+  depends_on = [module.k8s_resources, helm_release.nginx_ingress]
 }
 
 resource "local_file" "kubeconfig" {
@@ -174,7 +175,7 @@ module "route53" {
   environment            = var.environment
   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
   load_balancer_zone_id  = data.aws_elb_hosted_zone_id.main.id
-  create_route53_zone    = true  # Set this to true if you want to create a new zone
+  create_route53_zone    = false  # Set this to true if you want to create a new zone
 
   depends_on = [time_sleep.wait_for_loadbalancer]
 }

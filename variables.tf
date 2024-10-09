@@ -112,3 +112,9 @@ variable "domain_name" {
   type        = string
   default     = "voicesapp.net"
 }
+
+variable "create_ingress" {
+  description = "Enable ingress"
+  type        = bool
+  default     = false
+}
