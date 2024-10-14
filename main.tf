@@ -91,10 +91,10 @@ module "external_dns" {
   source          = "./modules/external_dns"
   cluster_name    = var.cluster_name
   domain_name     = var.domain_name
-  route53_zone_id = "Z0911565366AIRVSFF4BP"
+  route53_zone_id = module.route53.zone_id
   eks_depends_on  = module.eks.cluster_id
 
-  #depends_on = [module.eks, module.route53]
+  depends_on = [module.eks, module.route53]
 }
 
 resource "kubernetes_namespace" "ingress_nginx" {
@@ -168,7 +168,6 @@ module "voice_app" {
   depends_on = [module.k8s_resources, helm_release.nginx_ingress]
 }
 
-# ... (rest of the file remains unchanged)
 data "kubernetes_service" "nginx_ingress" {
   metadata {
     name      = "${helm_release.nginx_ingress.name}-ingress-nginx-controller"
@@ -191,14 +190,14 @@ data "aws_lb" "nginx_ingress" {
   name = split("-", data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname)[0]
 }
 
-# module "route53" {
-#   source                 = "./modules/route53"
-#   domain_name            = var.domain_name
-#   environment            = var.environment
-#   load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
-#   load_balancer_zone_id  = data.aws_lb.nginx_ingress.zone_id
+module "route53" {
+  source                 = "./modules/route53"
+  domain_name            = var.domain_name
+  environment            = var.environment
+  load_balancer_dns_name = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
+  load_balancer_zone_id  = data.aws_lb.nginx_ingress.zone_id
   
 
-#   depends_on = [time_sleep.wait_for_loadbalancer]
-# }
+  depends_on = [time_sleep.wait_for_loadbalancer]
+}
 

@@ -1,5 +1,10 @@
 # modules/voice_app/variables.tf
 
+variable "namespace" {
+  description = "Kubernetes namespace for the voice app"
+  type        = string
+}
+
 variable "release_name" {
   description = "Name of the Helm release"
   type        = string
@@ -10,8 +15,8 @@ variable "chart_path" {
   type        = string
 }
 
-variable "namespace" {
-  description = "Kubernetes namespace for the Voice app"
+variable "chart_version" {
+  description = "Version of the Helm chart"
   type        = string
 }
 
@@ -36,7 +41,12 @@ variable "worker_replica_count" {
 }
 
 variable "ingress_enabled" {
-  description = "Whether to enable ingress"
+  description = "Whether to enable ingress in the Helm chart"
+  type        = bool
+}
+
+variable "create_ingress" {
+  description = "Whether to create the Kubernetes Ingress resource"
   type        = bool
 }
 
@@ -50,44 +60,22 @@ variable "storage_class_name" {
   type        = string
 }
 
-variable "chart_version" {
-  description = "Version of the Helm chart"
-  type        = string
-  default     = "0.1.0"
-}
-
-variable "create_namespace" {
-  description = "Whether to create the namespace"
-  type        = bool
-  default     = true
-}
-
 variable "uploads_storage_size" {
   description = "Storage size for uploads PVC"
   type        = string
-  default     = "1Gi"
 }
 
 variable "output_storage_size" {
   description = "Storage size for output PVC"
   type        = string
-  default     = "1Gi"
 }
 
 variable "redis_master_storage_size" {
   description = "Storage size for Redis master PVC"
   type        = string
-  default     = "1Gi"
 }
 
 variable "redis_replicas_storage_size" {
   description = "Storage size for Redis replicas PVC"
   type        = string
-  default     = "1Gi"
-}
-
-variable "create_ingress" {
-  description = "Enable ingress"
-  type        = bool
-  default     = false
 }

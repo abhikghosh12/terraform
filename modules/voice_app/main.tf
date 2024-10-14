@@ -154,11 +154,12 @@ resource "kubernetes_ingress_v1" "voice_app" {
   }
 
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = var.ingress_host
       http {
         path {
-          path = "/"
+          path      = "/"
           path_type = "Prefix"
           backend {
             service {
@@ -176,5 +177,6 @@ resource "kubernetes_ingress_v1" "voice_app" {
       hosts = [var.ingress_host]
     }
   }
-}
 
+  depends_on = [helm_release.voice_app]
+}
