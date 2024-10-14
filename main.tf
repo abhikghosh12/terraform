@@ -74,28 +74,6 @@ module "k8s_resources" {
   depends_on = [module.efs]
 }
 
-module "voice_app" {
-  source                      = "./modules/voice_app"
-  namespace                   = var.namespace
-  release_name                = var.release_name
-  chart_path                  = "${path.root}/${var.chart_path}"
-  chart_version               = var.chart_version
-  webapp_image_tag            = var.webapp_image_tag
-  worker_image_tag            = var.worker_image_tag
-  webapp_replica_count        = var.webapp_replica_count
-  worker_replica_count        = var.worker_replica_count
-  ingress_enabled             = var.ingress_enabled
-  ingress_host                = var.domain_name
-  storage_class_name          = "efs-sc"
-  uploads_storage_size        = var.uploads_storage_size
-  output_storage_size         = var.output_storage_size
-  redis_master_storage_size   = "1Gi"
-  redis_replicas_storage_size = "1Gi"
-  create_ingress              = false  # Set this to false to avoid creating the Ingress resource
-
-  depends_on = [module.k8s_resources, helm_release.nginx_ingress]
-}
-
 resource "local_file" "kubeconfig" {
   depends_on = [null_resource.wait_for_cluster]
   filename   = "${path.root}/kubeconfig_${var.cluster_name}"
@@ -127,11 +105,12 @@ resource "kubernetes_namespace" "ingress_nginx" {
   depends_on = [module.eks, null_resource.wait_for_cluster]
 }
 
+
 resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
-  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
+  namespace  = "ingress-nginx"  # Use existing namespace
   version    = "4.7.1"
 
   set {
@@ -149,9 +128,47 @@ resource "helm_release" "nginx_ingress" {
     value = "true"
   }
 
-  depends_on = [module.eks, kubernetes_namespace.ingress_nginx]
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-cert"
+    value = "arn:aws:acm:eu-central-1:345594596351:certificate/a44fd35d-ea15-4e2c-ae4b-bc0d48534c43"
+  }
+
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-ports"
+    value = "https"
+  }
+
+  set {
+    name  = "controller.service.targetPorts.https"
+    value = "http"
+  }
+
+  depends_on = [module.eks]
 }
 
+module "voice_app" {
+  source                      = "./modules/voice_app"
+  namespace                   = var.namespace
+  release_name                = var.release_name
+  chart_path                  = "${path.root}/${var.chart_path}"
+  chart_version               = var.chart_version
+  webapp_image_tag            = var.webapp_image_tag
+  worker_image_tag            = var.worker_image_tag
+  webapp_replica_count        = var.webapp_replica_count
+  worker_replica_count        = var.worker_replica_count
+  ingress_enabled             = true
+  ingress_host                = var.domain_name
+  storage_class_name          = "efs-sc"
+  uploads_storage_size        = var.uploads_storage_size
+  output_storage_size         = var.output_storage_size
+  redis_master_storage_size   = "1Gi"
+  redis_replicas_storage_size = "1Gi"
+  create_ingress              = true
+
+  depends_on = [module.k8s_resources, helm_release.nginx_ingress]
+}
+
+# ... (rest of the file remains unchanged)
 data "kubernetes_service" "nginx_ingress" {
   metadata {
     name      = "${helm_release.nginx_ingress.name}-ingress-nginx-controller"
@@ -184,3 +201,4 @@ module "route53" {
 
   depends_on = [time_sleep.wait_for_loadbalancer]
 }
+

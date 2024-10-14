@@ -64,6 +64,44 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
   }
 }
 
+resource "kubernetes_ingress_v1" "voice_app" {
+  count = var.create_ingress ? 1 : 0
+
+  metadata {
+    name      = "voice-app-ingress"
+    namespace = var.namespace
+    annotations = {
+      "kubernetes.io/ingress.class" = "nginx"
+      "nginx.ingress.kubernetes.io/ssl-redirect" = "false"
+    }
+  }
+
+  spec {
+    rule {
+      host = var.ingress_host
+      http {
+        path {
+          path = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "voice-app-service"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+
 resource "helm_release" "voice_app" {
   name      = var.release_name
   chart     = var.chart_path
@@ -138,14 +176,6 @@ resource "helm_release" "voice_app" {
     kubernetes_persistent_volume_claim.redis_master,
     kubernetes_persistent_volume_claim.redis_replicas,
   ]
-
-  lifecycle {
-    ignore_changes = [
-      values,
-      version,
-      set,
-    ]
-  }
 }
 
 resource "kubernetes_ingress_v1" "voice_app" {
@@ -155,8 +185,9 @@ resource "kubernetes_ingress_v1" "voice_app" {
     name      = "voice-app-ingress"
     namespace = var.namespace
     annotations = {
-      "kubernetes.io/ingress.class" = "nginx"
-      "nginx.ingress.kubernetes.io/ssl-redirect" = "false"
+      "kubernetes.io/ingress.class"                    = "nginx"
+      "nginx.ingress.kubernetes.io/ssl-redirect"       = "false"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
   }
 
@@ -169,7 +200,7 @@ resource "kubernetes_ingress_v1" "voice_app" {
           path_type = "Prefix"
           backend {
             service {
-              name = "voice-app-service"
+              name = "${var.release_name}-voice-app"
               port {
                 number = 80
               }
@@ -178,10 +209,10 @@ resource "kubernetes_ingress_v1" "voice_app" {
         }
       }
     }
-  }
 
-  lifecycle {
-    ignore_changes = all
+    tls {
+      hosts = [var.ingress_host]
+    }
   }
 }
 
