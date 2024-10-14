@@ -147,20 +147,23 @@ resource "kubernetes_ingress_v1" "voice_app" {
     name      = "voice-app-ingress"
     namespace = var.namespace
     annotations = {
-      "kubernetes.io/ingress.class"                    = "nginx"
-      "nginx.ingress.kubernetes.io/ssl-redirect"       = "false"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+      "kubernetes.io/ingress.class"                 = "nginx"
+      "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
+      "nginx.ingress.kubernetes.io/use-regex"       = "true"
+      "nginx.ingress.kubernetes.io/rewrite-target"  = "/$1"
+      "nginx.ingress.kubernetes.io/configuration-snippet" = "proxy_set_header Access-Control-Allow-Origin \"*\";"
     }
   }
 
   spec {
     ingress_class_name = "nginx"
+
     rule {
       host = var.ingress_host
       http {
         path {
-          path      = "/"
-          path_type = "Prefix"
+          path      = "/(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "${var.release_name}-voice-app"
@@ -173,8 +176,21 @@ resource "kubernetes_ingress_v1" "voice_app" {
       }
     }
 
-    tls {
-      hosts = [var.ingress_host]
+    rule {
+      http {
+        path {
+          path      = "/(.*)"
+          path_type = "ImplementationSpecific"
+          backend {
+            service {
+              name = "${var.release_name}-voice-app"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
     }
   }
 

@@ -93,13 +93,13 @@ variable "ingress_host" {
 variable "uploads_storage_size" {
   description = "Size of the storage for uploads PVC"
   type        = string
-  default     = "1Gi"
+  default     = "5Gi"
 }
 
 variable "output_storage_size" {
   description = "Size of the storage for output PVC"
   type        = string
-  default     = "1Gi"
+  default     = "5Gi"
 }
 variable "kubernetes_version" {
   description = "Kubernetes version to use for the EKS cluster"
