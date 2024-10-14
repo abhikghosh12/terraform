@@ -91,7 +91,7 @@ module "external_dns" {
   source          = "./modules/external_dns"
   cluster_name    = var.cluster_name
   domain_name     = var.domain_name
-  route53_zone_id = module.route53.zone_id
+  route53_zone_id = "Z0911565366AIRVSFF4BP"
   eks_depends_on  = module.eks.cluster_id
 
   #depends_on = [module.eks, module.route53]
