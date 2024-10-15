@@ -56,8 +56,8 @@ resource "kubernetes_persistent_volume" "voice_app_pvs" {
     # Temporarily comment out prevent_destroy
     # prevent_destroy = true
     ignore_changes = [
-      metadata.annotations,
-      metadata.labels,
+      metadata[0].annotations,
+      metadata[0].labels,
     ]
   }
 }
