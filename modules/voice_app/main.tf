@@ -177,16 +177,7 @@ resource "helm_release" "voice_app" {
     value = var.ingress_host
   }
 
-# Keep the kubernetes_ingress_v1 resource as is
-  
-  depends_on = [
-    kubernetes_persistent_volume_claim.voice_app_uploads,
-    kubernetes_persistent_volume_claim.voice_app_output,
-    kubernetes_persistent_volume_claim.redis_master,
-    kubernetes_persistent_volume_claim.redis_replicas,
-  ]
 }
-
 resource "kubernetes_ingress_v1" "voice_app" {
   count = var.create_ingress ? 1 : 0
 
