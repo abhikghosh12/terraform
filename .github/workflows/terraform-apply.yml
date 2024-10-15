@@ -37,7 +37,6 @@ jobs:
 
     - name: Terraform rm
       run: |
-        terraform state list | Select-String "voice-app"
         terraform state rm 'module.voice_app.kubernetes_persistent_volume_claim.voice_app_uploads'
         terraform state rm 'module.voice_app.kubernetes_persistent_volume_claim.voice_app_output'
         terraform state rm 'module.voice_app.kubernetes_persistent_volume_claim.redis_master'
