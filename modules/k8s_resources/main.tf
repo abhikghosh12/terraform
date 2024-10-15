@@ -35,7 +35,7 @@ resource "kubernetes_persistent_volume" "voice_app_pvs" {
   for_each = { for idx, config in local.pv_configs : config.name => config }
 
   metadata {
-    name = "pv-${each.key}-${sha256(timestamp())}"
+    name = "pv-${each.key}"
   }
   spec {
     capacity = {
@@ -54,6 +54,9 @@ resource "kubernetes_persistent_volume" "voice_app_pvs" {
 
   lifecycle {
     prevent_destroy = true
-    create_before_destroy = true
+    ignore_changes = [
+      metadata,
+      spec["capacity"],
+    ]
   }
 }

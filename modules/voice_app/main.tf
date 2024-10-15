@@ -2,7 +2,7 @@
 
 resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
   metadata {
-    name      = "voice-app-uploads-${sha256(timestamp())}"
+    name      = "voice-app-uploads"
     namespace = var.namespace
   }
   spec {
@@ -16,13 +16,16 @@ resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
     volume_name = var.pv_names["voice-app-uploads"]
   }
   lifecycle {
-    create_before_destroy = true
+    ignore_changes = [
+      metadata,
+      spec["resources"],
+    ]
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "voice_app_output" {
   metadata {
-    name      = "voice-app-output-${sha256(timestamp())}"
+    name      = "voice-app-output"
     namespace = var.namespace
   }
   spec {
@@ -36,13 +39,16 @@ resource "kubernetes_persistent_volume_claim" "voice_app_output" {
     volume_name = var.pv_names["voice-app-output"]
   }
   lifecycle {
-    create_before_destroy = true
+    ignore_changes = [
+      metadata,
+      spec["resources"],
+    ]
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "redis_master" {
   metadata {
-    name      = "redis-master-${sha256(timestamp())}"
+    name      = "redis-master"
     namespace = var.namespace
   }
   spec {
@@ -56,13 +62,16 @@ resource "kubernetes_persistent_volume_claim" "redis_master" {
     volume_name = var.pv_names["redis-master"]
   }
   lifecycle {
-    create_before_destroy = true
+    ignore_changes = [
+      metadata,
+      spec["resources"],
+    ]
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "redis_replicas" {
   metadata {
-    name      = "redis-replicas-${sha256(timestamp())}"
+    name      = "redis-replicas"
     namespace = var.namespace
   }
   spec {
@@ -76,11 +85,13 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
     volume_name = var.pv_names["redis-replicas"]
   }
   lifecycle {
-    create_before_destroy = true
+    ignore_changes = [
+      metadata,
+      spec["resources"],
+    ]
   }
 }
 
-# ... (rest of the file remains unchanged)
 
 resource "helm_release" "voice_app" {
   name      = var.release_name
