@@ -148,6 +148,7 @@ resource "helm_release" "nginx_ingress" {
 
 module "voice_app" {
   source                      = "./modules/voice_app"
+  pv_names                    = module.k8s_resources.pv_names
   namespace                   = var.namespace
   release_name                = var.release_name
   chart_path                  = "${path.root}/${var.chart_path}"

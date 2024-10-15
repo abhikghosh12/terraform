@@ -81,6 +81,6 @@ variable "redis_replicas_storage_size" {
 }
 
 variable "pv_names" {
-  description = "Map of PV names created in the k8s_resources module"
+  description = "Map of Persistent Volume names created by the k8s_resources module"
   type        = map(string)
 }
