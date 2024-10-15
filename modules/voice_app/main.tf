@@ -116,55 +116,55 @@ resource "helm_release" "voice_app" {
   ]
 
   set {
-    name  = "persistence.uploads.annotations.meta\\.helm\\.sh/release-name"
-    value = var.release_name
-  }
-  set {
-    name  = "persistence.uploads.annotations.meta\\.helm\\.sh/release-namespace"
-    value = var.namespace
-  }
-  set {
-    name  = "persistence.uploads.labels.app\\.kubernetes\\.io/managed-by"
-    value = "Helm"
-  }
-  set {
     name  = "persistence.uploads.enabled"
     value = "true"
+  }
+  set {
+    name  = "persistence.uploads.storageClassName"
+    value = var.storage_class_name
+  }
+  set {
+    name  = "persistence.uploads.size"
+    value = var.uploads_storage_size
   }
 
   set {
     name  = "persistence.output.enabled"
     value = "true"
   }
+  set {
+    name  = "persistence.output.storageClassName"
+    value = var.storage_class_name
+  }
+  set {
+    name  = "persistence.output.size"
+    value = var.output_storage_size
+  }
 
   set {
     name  = "redis.master.persistence.enabled"
     value = "true"
+  }
+  set {
+    name  = "redis.master.persistence.storageClass"
+    value = var.storage_class_name
+  }
+  set {
+    name  = "redis.master.persistence.size"
+    value = var.redis_master_storage_size
   }
 
   set {
     name  = "redis.replica.persistence.enabled"
     value = "true"
   }
-
   set {
-    name  = "persistence.uploads.existingClaim"
-    value = kubernetes_persistent_volume_claim.voice_app_uploads.metadata[0].name
+    name  = "redis.replica.persistence.storageClass"
+    value = var.storage_class_name
   }
-
   set {
-    name  = "persistence.output.existingClaim"
-    value = kubernetes_persistent_volume_claim.voice_app_output.metadata[0].name
-  }
-
-  set {
-    name  = "redis.master.persistence.existingClaim"
-    value = kubernetes_persistent_volume_claim.redis_master.metadata[0].name
-  }
-
-  set {
-    name  = "redis.replica.persistence.existingClaim"
-    value = kubernetes_persistent_volume_claim.redis_replicas.metadata[0].name
+    name  = "redis.replica.persistence.size"
+    value = var.redis_replicas_storage_size
   }
 
   set {
@@ -176,6 +176,8 @@ resource "helm_release" "voice_app" {
     name  = "ingress.host"
     value = var.ingress_host
   }
+
+# Keep the kubernetes_ingress_v1 resource as is
   
   depends_on = [
     kubernetes_persistent_volume_claim.voice_app_uploads,
