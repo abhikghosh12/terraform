@@ -2,7 +2,7 @@
 
 resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
   metadata {
-    name      = "voice-app-uploads"
+    name      = "voice-app-uploads1"
     namespace = var.namespace
   }
   spec {
@@ -18,7 +18,7 @@ resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
 
 resource "kubernetes_persistent_volume_claim" "voice_app_output" {
   metadata {
-    name      = "voice-app-output"
+    name      = "voice-app-output1"
     namespace = var.namespace
   }
   spec {
@@ -38,7 +38,7 @@ resource "kubernetes_persistent_volume_claim" "redis_master" {
     namespace = var.namespace
   }
   spec {
-    access_modes       = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteMany"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
@@ -54,7 +54,7 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
     namespace = var.namespace
   }
   spec {
-    access_modes       = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteMany"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
