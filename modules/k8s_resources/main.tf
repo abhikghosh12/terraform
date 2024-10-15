@@ -53,10 +53,12 @@ resource "kubernetes_persistent_volume" "voice_app_pvs" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    # Temporarily comment out prevent_destroy
+    # prevent_destroy = true
     ignore_changes = [
-      metadata,
-      spec["capacity"],
+      metadata.annotations,
+      metadata.labels,
     ]
   }
 }
+
