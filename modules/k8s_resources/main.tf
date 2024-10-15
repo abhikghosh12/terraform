@@ -52,13 +52,13 @@ resource "kubernetes_persistent_volume" "voice_app_pvs" {
     }
   }
 
-  lifecycle {
-    # Temporarily comment out prevent_destroy
-    # prevent_destroy = true
-    ignore_changes = [
-      metadata[0].annotations,
-      metadata[0].labels,
-    ]
-  }
+  # lifecycle {
+  #   # Temporarily comment out prevent_destroy
+  #   # prevent_destroy = true
+  #   ignore_changes = [
+  #     metadata[0].annotations,
+  #     metadata[0].labels,
+  #   ]
+  # }
 }
 
