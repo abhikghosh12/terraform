@@ -79,3 +79,8 @@ variable "redis_replicas_storage_size" {
   description = "Storage size for Redis replicas PVC"
   type        = string
 }
+
+variable "pv_names" {
+  description = "Map of PV names created in the k8s_resources module"
+  type        = map(string)
+}

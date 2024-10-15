@@ -2,7 +2,7 @@
 
 resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
   metadata {
-    name      = "voice-app-uploads1"
+    name      = "voice-app-uploads-${sha256(timestamp())}"
     namespace = var.namespace
   }
   spec {
@@ -13,12 +13,16 @@ resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
         storage = var.uploads_storage_size
       }
     }
+    volume_name = var.pv_names["voice-app-uploads"]
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "voice_app_output" {
   metadata {
-    name      = "voice-app-output1"
+    name      = "voice-app-output-${sha256(timestamp())}"
     namespace = var.namespace
   }
   spec {
@@ -29,12 +33,16 @@ resource "kubernetes_persistent_volume_claim" "voice_app_output" {
         storage = var.output_storage_size
       }
     }
+    volume_name = var.pv_names["voice-app-output"]
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "redis_master" {
   metadata {
-    name      = "redis-master"
+    name      = "redis-master-${sha256(timestamp())}"
     namespace = var.namespace
   }
   spec {
@@ -45,12 +53,16 @@ resource "kubernetes_persistent_volume_claim" "redis_master" {
         storage = var.redis_master_storage_size
       }
     }
+    volume_name = var.pv_names["redis-master"]
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "redis_replicas" {
   metadata {
-    name      = "redis-replicas"
+    name      = "redis-replicas-${sha256(timestamp())}"
     namespace = var.namespace
   }
   spec {
@@ -61,8 +73,14 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
         storage = var.redis_replicas_storage_size
       }
     }
+    volume_name = var.pv_names["redis-replicas"]
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
+
+# ... (rest of the file remains unchanged)
 
 resource "helm_release" "voice_app" {
   name      = var.release_name
