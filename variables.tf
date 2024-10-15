@@ -119,7 +119,3 @@ variable "create_ingress" {
   default     = false
 }
 
-variable "namespace_id" {
-  description = "ID of the created namespace"
-  type        = string
-}

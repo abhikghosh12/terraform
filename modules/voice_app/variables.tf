@@ -85,7 +85,3 @@ variable "pv_names" {
   type        = map(string)
 }
 
-variable "namespace_id" {
-  description = "ID of the created namespace"
-  type        = string
-}

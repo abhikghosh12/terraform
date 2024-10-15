@@ -9,6 +9,3 @@ output "pv_names" {
   value = {for k, v in kubernetes_persistent_volume.voice_app_pvs : k => v.metadata[0].name}
 }
 
-output "namespace_id" {
-  value = kubernetes_namespace.voice_app.id
-}
