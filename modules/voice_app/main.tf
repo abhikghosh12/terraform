@@ -21,6 +21,7 @@ resource "kubernetes_persistent_volume_claim" "voice_app_uploads" {
       spec["resources"],
     ]
   }
+  depends_on = [var.namespace_id]
 }
 
 resource "kubernetes_persistent_volume_claim" "voice_app_output" {
@@ -44,6 +45,7 @@ resource "kubernetes_persistent_volume_claim" "voice_app_output" {
       spec["resources"],
     ]
   }
+  depends_on = [var.namespace_id]
 }
 
 resource "kubernetes_persistent_volume_claim" "redis_master" {
@@ -67,6 +69,7 @@ resource "kubernetes_persistent_volume_claim" "redis_master" {
       spec["resources"],
     ]
   }
+  depends_on = [var.namespace_id]
 }
 
 resource "kubernetes_persistent_volume_claim" "redis_replicas" {
@@ -90,6 +93,7 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
       spec["resources"],
     ]
   }
+  depends_on = [var.namespace_id]
 }
 
 

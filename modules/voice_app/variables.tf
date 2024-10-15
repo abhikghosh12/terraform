@@ -84,3 +84,8 @@ variable "pv_names" {
   description = "Map of Persistent Volume names created by the k8s_resources module"
   type        = map(string)
 }
+
+variable "namespace_id" {
+  description = "ID of the created namespace"
+  type        = string
+}

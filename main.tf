@@ -150,6 +150,7 @@ module "voice_app" {
   source                      = "./modules/voice_app"
   pv_names                    = module.k8s_resources.pv_names
   namespace                   = var.namespace
+  namespace_id                = module.k8s_resources.namespace_id
   release_name                = var.release_name
   chart_path                  = "${path.root}/${var.chart_path}"
   chart_version               = var.chart_version
@@ -166,7 +167,8 @@ module "voice_app" {
   redis_replicas_storage_size = "1Gi"
   create_ingress              = true
 
-  depends_on = [module.k8s_resources, helm_release.nginx_ingress]
+  depends_on = [module.k8s_resources, helm_release.nginx_ingress ]
+
 }
 
 data "kubernetes_service" "nginx_ingress" {
