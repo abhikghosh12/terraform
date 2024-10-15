@@ -162,8 +162,8 @@ module "voice_app" {
   storage_class_name          = "efs-sc"
   uploads_storage_size        = var.uploads_storage_size
   output_storage_size         = var.output_storage_size
-  redis_master_storage_size   = "1Gi"
-  redis_replicas_storage_size = "1Gi"
+  redis_master_storage_size   = "2Gi"
+  redis_replicas_storage_size = "2Gi"
   create_ingress              = true
 
   depends_on = [module.k8s_resources, helm_release.nginx_ingress]

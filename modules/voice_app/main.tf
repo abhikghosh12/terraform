@@ -116,6 +116,18 @@ resource "helm_release" "voice_app" {
   ]
 
   set {
+    name  = "persistence.uploads.annotations.meta\\.helm\\.sh/release-name"
+    value = var.release_name
+  }
+  set {
+    name  = "persistence.uploads.annotations.meta\\.helm\\.sh/release-namespace"
+    value = var.namespace
+  }
+  set {
+    name  = "persistence.uploads.labels.app\\.kubernetes\\.io/managed-by"
+    value = "Helm"
+  }
+  set {
     name  = "persistence.uploads.enabled"
     value = "true"
   }
