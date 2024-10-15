@@ -95,8 +95,6 @@ resource "kubernetes_persistent_volume_claim" "redis_replicas" {
   }
 
 }
-
-
 resource "helm_release" "voice_app" {
   name      = var.release_name
   chart     = var.chart_path
@@ -117,7 +115,7 @@ resource "helm_release" "voice_app" {
 
   set {
     name  = "persistence.uploads.enabled"
-    value = "true"
+    value = "false"
   }
   set {
     name  = "persistence.uploads.storageClassName"
@@ -130,7 +128,7 @@ resource "helm_release" "voice_app" {
 
   set {
     name  = "persistence.output.enabled"
-    value = "true"
+    value = "false"
   }
   set {
     name  = "persistence.output.storageClassName"
@@ -143,7 +141,7 @@ resource "helm_release" "voice_app" {
 
   set {
     name  = "redis.master.persistence.enabled"
-    value = "true"
+    value = "false"
   }
   set {
     name  = "redis.master.persistence.storageClass"
@@ -156,7 +154,7 @@ resource "helm_release" "voice_app" {
 
   set {
     name  = "redis.replica.persistence.enabled"
-    value = "true"
+    value = "false"
   }
   set {
     name  = "redis.replica.persistence.storageClass"
@@ -178,6 +176,8 @@ resource "helm_release" "voice_app" {
   }
 
 }
+
+
 resource "kubernetes_ingress_v1" "voice_app" {
   count = var.create_ingress ? 1 : 0
 
