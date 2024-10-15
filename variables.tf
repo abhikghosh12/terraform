@@ -33,7 +33,7 @@ variable "cluster_name" {
 variable "namespace" {
   description = "Kubernetes namespace for the Voice app"
   type        = string
-  default     = "voice-app"
+  default     = "voiceapp"
 }
 
 variable "release_name" {
