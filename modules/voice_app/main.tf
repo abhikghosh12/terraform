@@ -117,22 +117,22 @@ resource "helm_release" "voice_app" {
 
   set {
     name  = "persistence.uploads.enabled"
-    value = "false"
+    value = "true"
   }
 
   set {
     name  = "persistence.output.enabled"
-    value = "false"
+    value = "true"
   }
 
   set {
     name  = "redis.master.persistence.enabled"
-    value = "false"
+    value = "true"
   }
 
   set {
     name  = "redis.replica.persistence.enabled"
-    value = "false"
+    value = "true"
   }
 
   set {

@@ -26,8 +26,8 @@ locals {
   pv_configs = [
     { name = "voice-app-uploads", size = var.uploads_storage_size },
     { name = "voice-app-output", size = var.output_storage_size },
-    { name = "redis-master", size = "1Gi" },
-    { name = "redis-replicas", size = "1Gi" },
+    { name = "redis-master", size = "2Gi" },
+    { name = "redis-replicas", size = "2Gi" },
   ]
 }
 
