@@ -18,7 +18,7 @@ resource "kubernetes_storage_class" "efs" {
   parameters = {
     provisioningMode = "efs-ap"
     fileSystemId     = var.efs_id
-    directoryPerms   = "777"
+    directoryPerms   = "700"
   }
 }
 

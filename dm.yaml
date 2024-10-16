@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: update-efs-utils
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: update-efs-utils
+  template:
+    metadata:
+      labels:
+        name: update-efs-utils
+    spec:
+      containers:
+      - name: update-efs-utils
+        image: amazon/aws-cli
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          yum update -y amazon-efs-utils
+          echo "fips_mode_enabled = false" >> /etc/amazon/efs/efs-utils.conf
+          echo "retry_nfs_mount_command = true" >> /etc/amazon/efs/efs-utils.conf
+        securityContext:
+          privileged: true
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true

@@ -16,16 +16,16 @@ module "eks" {
   depends_on         = [module.vpc]
 }
 
-module "efs" {
-  source            = "./modules/efs"
-  vpc_id            = module.vpc.vpc_id
-  vpc_cidr          = var.vpc_cidr
-  subnet_ids        = module.vpc.private_subnet_ids
-  environment       = var.environment
-  cluster_name      = module.eks.cluster_name  # Use the output from EKS module
-  oidc_provider_arn = module.eks.oidc_provider_arn  # Use the output from EKS module
-  depends_on        = [module.eks]
-}
+# module "efs" {
+#   source            = "./modules/efs"
+#   vpc_id            = module.vpc.vpc_id
+#   vpc_cidr          = var.vpc_cidr
+#   subnet_ids        = module.vpc.private_subnet_ids
+#   environment       = var.environment
+#   cluster_name      = module.eks.cluster_name  # Use the output from EKS module
+#   oidc_provider_arn = module.eks.oidc_provider_arn  # Use the output from EKS module
+#   depends_on        = [module.eks]
+# }
 
 resource "time_sleep" "wait_for_eks" {
   depends_on      = [module.eks]
@@ -63,16 +63,16 @@ resource "null_resource" "wait_for_cluster" {
   }
 }
 
-module "k8s_resources" {
-  source               = "./modules/k8s_resources"
-  namespace            = var.namespace
-  efs_id               = module.efs.efs_id
-  uploads_storage_size       = var.uploads_storage_size
-  output_storage_size        = var.output_storage_size
+# module "k8s_resources" {
+#   source               = "./modules/k8s_resources"
+#   namespace            = var.namespace
+#   efs_id               = module.efs.efs_id
+#   uploads_storage_size       = var.uploads_storage_size
+#   output_storage_size        = var.output_storage_size
 
 
-  depends_on = [module.efs]
-}
+#   depends_on = [module.efs]
+# }
 
 resource "local_file" "kubeconfig" {
   depends_on = [null_resource.wait_for_cluster]
@@ -146,29 +146,29 @@ resource "helm_release" "nginx_ingress" {
   depends_on = [module.eks]
 }
 
-module "voice_app" {
-  source                      = "./modules/voice_app"
-  pv_names                    = module.k8s_resources.pv_names
-  namespace                   = var.namespace
-  release_name                = var.release_name
-  chart_path                  = "${path.root}/${var.chart_path}"
-  chart_version               = var.chart_version
-  webapp_image_tag            = var.webapp_image_tag
-  worker_image_tag            = var.worker_image_tag
-  webapp_replica_count        = var.webapp_replica_count
-  worker_replica_count        = var.worker_replica_count
-  ingress_enabled             = true
-  ingress_host                = var.domain_name
-  storage_class_name          = "efs-sc"
-  uploads_storage_size        = var.uploads_storage_size
-  output_storage_size         = var.output_storage_size
-  redis_master_storage_size   = "2Gi"
-  redis_replicas_storage_size = "2Gi"
-  create_ingress              = true
+# module "voice_app" {
+#   source                      = "./modules/voice_app"
+#   pv_names                    = module.k8s_resources.pv_names
+#   namespace                   = var.namespace
+#   release_name                = var.release_name
+#   chart_path                  = "${path.root}/${var.chart_path}"
+#   chart_version               = var.chart_version
+#   webapp_image_tag            = var.webapp_image_tag
+#   worker_image_tag            = var.worker_image_tag
+#   webapp_replica_count        = var.webapp_replica_count
+#   worker_replica_count        = var.worker_replica_count
+#   ingress_enabled             = true
+#   ingress_host                = var.domain_name
+#   storage_class_name          = "efs-sc"
+#   uploads_storage_size        = var.uploads_storage_size
+#   output_storage_size         = var.output_storage_size
+#   redis_master_storage_size   = "2Gi"
+#   redis_replicas_storage_size = "2Gi"
+#   create_ingress              = true
 
-  depends_on = [module.k8s_resources, helm_release.nginx_ingress]
+#   depends_on = [module.k8s_resources, helm_release.nginx_ingress]
 
-}
+# }
 
 data "kubernetes_service" "nginx_ingress" {
   metadata {

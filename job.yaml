@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-efs-directories-v1
+spec:
+  template:
+    spec:
+      containers:
+      - name: create-directories
+        image: amazon/aws-cli
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          mkdir -p /mnt/efs
+          mount -t efs -o tls fs-0d0f4ee279f0b5fc9:/ /mnt/efs
+          mkdir -p /mnt/efs/voice-app-uploads /mnt/efs/voice-app-output
+          chmod 777 /mnt/efs/voice-app-uploads /mnt/efs/voice-app-output
+          umount /mnt/efs
+        securityContext:
+          privileged: true
+      restartPolicy: Never

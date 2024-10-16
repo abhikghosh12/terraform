@@ -35,9 +35,9 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform rm
-      run: |        
-        terraform state list
+    # - name: Terraform rm
+    #   run: |        
+    #     terraform state list
     #     terraform state rm 'module.k8s_resources.kubernetes_namespace.voice_app'
     #     terraform state rm 'module.k8s_resources.kubernetes_persistent_volume.voice_app_pvs["redis-master"]'
     #     terraform state rm 'module.k8s_resources.kubernetes_persistent_volume.voice_app_pvs["redis-replicas"]'
@@ -50,17 +50,17 @@ jobs:
     #     terraform state rm 'module.voice_app.kubernetes_persistent_volume_claim.redis_replicas'
 
 
-    # - name: Terraform Plan
-    #   run: |
-    #     echo "Using chart at: $CHART_PATH"
-    #     terraform plan -out=tfplan -parallelism=200 -refresh=false
+    - name: Terraform Plan
+      run: |
+        echo "Using chart at: $CHART_PATH"
+        terraform plan -out=tfplan -parallelism=200 -refresh=false
 
-    # - name: Terraform Apply
-    #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    #   env:
-    #     TF_LOG: DEBUG
-    #   run: |
-    #     terraform apply -auto-approve tfplan
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      env:
+        TF_LOG: DEBUG
+      run: |
+        terraform apply -auto-approve tfplan
 
  
     # - name: Terraform Destroy
