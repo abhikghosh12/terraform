@@ -26,8 +26,3 @@ variable "efs_access_point_id" {
   description = "ID of the EFS access point"
   type        = string
 }
-
-variable "efs_id" {
-  description = "ID of the EFS file system"
-  type        = string
-}
