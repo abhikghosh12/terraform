@@ -15,12 +15,12 @@ output "eks_cluster_security_group_id" {
   value       = module.eks.cluster_security_group_id
 }
 
-# output "efs_id" {
-#   description = "ID of the EFS file system"
-#   value       = module.efs.efs_id
-# }
+output "efs_id" {
+  description = "ID of the EFS file system"
+  value       = module.efs.efs_id
+}
 
-# output "efs_dns_name" {
-#   description = "DNS name of the EFS file system"
-#   value       = module.efs.efs_dns_name
-# }
+output "efs_dns_name" {
+  description = "DNS name of the EFS file system"
+  value       = module.efs.efs_dns_name
+}
