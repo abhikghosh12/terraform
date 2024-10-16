@@ -117,52 +117,40 @@ resource "helm_release" "voice_app" {
     name  = "persistence.uploads.enabled"
     value = "false"
   }
-  set {
-    name  = "persistence.uploads.storageClassName"
-    value = var.storage_class_name
-  }
-  set {
-    name  = "persistence.uploads.size"
-    value = var.uploads_storage_size
-  }
 
   set {
     name  = "persistence.output.enabled"
     value = "false"
-  }
-  set {
-    name  = "persistence.output.storageClassName"
-    value = var.storage_class_name
-  }
-  set {
-    name  = "persistence.output.size"
-    value = var.output_storage_size
   }
 
   set {
     name  = "redis.master.persistence.enabled"
     value = "false"
   }
-  set {
-    name  = "redis.master.persistence.storageClass"
-    value = var.storage_class_name
-  }
-  set {
-    name  = "redis.master.persistence.size"
-    value = var.redis_master_storage_size
-  }
 
   set {
     name  = "redis.replica.persistence.enabled"
     value = "false"
   }
+
   set {
-    name  = "redis.replica.persistence.storageClass"
-    value = var.storage_class_name
+    name  = "persistence.uploads.existingClaim"
+    value = kubernetes_persistent_volume_claim.voice_app_uploads.metadata[0].name
   }
+
   set {
-    name  = "redis.replica.persistence.size"
-    value = var.redis_replicas_storage_size
+    name  = "persistence.output.existingClaim"
+    value = kubernetes_persistent_volume_claim.voice_app_output.metadata[0].name
+  }
+
+  set {
+    name  = "redis.master.persistence.existingClaim"
+    value = kubernetes_persistent_volume_claim.redis_master.metadata[0].name
+  }
+
+  set {
+    name  = "redis.replica.persistence.existingClaim"
+    value = kubernetes_persistent_volume_claim.redis_replicas.metadata[0].name
   }
 
   set {
@@ -174,7 +162,13 @@ resource "helm_release" "voice_app" {
     name  = "ingress.host"
     value = var.ingress_host
   }
-
+  
+  depends_on = [
+    kubernetes_persistent_volume_claim.voice_app_uploads,
+    kubernetes_persistent_volume_claim.voice_app_output,
+    kubernetes_persistent_volume_claim.redis_master,
+    kubernetes_persistent_volume_claim.redis_replicas,
+  ]
 }
 
 
