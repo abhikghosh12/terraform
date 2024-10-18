@@ -50,19 +50,19 @@ jobs:
     #     terraform state rm 'module.voice_app.kubernetes_persistent_volume_claim.redis_replicas'
 
 
-    - name: Terraform Plan
-      run: |
-        echo "Using chart at: $CHART_PATH"
-        terraform plan -out=tfplan -parallelism=200 -refresh=false
+    # - name: Terraform Plan
+    #   run: |
+    #     echo "Using chart at: $CHART_PATH"
+    #     terraform plan -out=tfplan -parallelism=200 -refresh=false
 
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      env:
-        TF_LOG: DEBUG
-      run: |
-        terraform apply -auto-approve tfplan
+    # - name: Terraform Apply
+    #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #   env:
+    #     TF_LOG: DEBUG
+    #   run: |
+    #     terraform apply -auto-approve tfplan
 
  
-    # - name: Terraform Destroy
-    #   run: |
-    #     terraform  destroy -auto-approve
+    - name: Terraform Destroy
+      run: |
+        terraform  destroy -auto-approve
