@@ -111,7 +111,7 @@ resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
-  namespace  = "ingress-nginx"  # Use existing namespace
+  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name  # Use existing namespace
   version    = "4.7.1"
 
   set {
