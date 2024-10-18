@@ -2,13 +2,13 @@
 
 webapp:
   image:
-    repository: abhikgho/text_to_speech_web_app
+    repository:  docker.io/abhikgho/text_to_speech_web_app
     tag: ${webapp_image_tag}
   replicaCount: ${webapp_replica_count}
 
 worker:
   image:
-    repository: abhikgho/text_to_speech_web_app
+    repository:  docker.io/abhikgho/text_to_speech_web_app
     tag: ${worker_image_tag}
   replicaCount: ${worker_replica_count}
 

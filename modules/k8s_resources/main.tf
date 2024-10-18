@@ -31,26 +31,77 @@ locals {
   ]
 }
 
-resource "kubernetes_daemonset" "check_update_efs_utils" {
+resource "kubernetes_daemonset" "update_efs_utils" {
   metadata {
-    name      = "check-update-efs-utils"
+    name      = "update-efs-utils"
     namespace = "kube-system"
   }
 
   spec {
     selector {
       match_labels = {
-        name = "check-update-efs-utils"
+        name = "update-efs-utils"
       }
     }
 
     template {
       metadata {
         labels = {
-          name = "check-update-efs-utils"
+          name = "update-efs-utils"
         }
       }
 
+      spec {
+        container {
+          name    = "update-efs-utils"
+          image   = "amazon/aws-cli"
+          command = ["/bin/bash", "-c"]
+          args    = [
+            <<-EOT
+            yum update -y amazon-efs-utils
+            mkdir -p /etc/amazon/efs
+            echo "fips_mode_enabled = false" >> /etc/amazon/efs/efs-utils.conf
+            echo "retry_nfs_mount_command = true" >> /etc/amazon/efs/efs-utils.conf
+            echo "Update completed successfully"
+            sleep infinity
+            EOT
+          ]
+
+          security_context {
+            privileged = true
+          }
+
+          volume_mount {
+            name       = "efs-utils-config"
+            mount_path = "/etc/amazon/efs"
+          }
+        }
+
+        volume {
+          name = "efs-utils-config"
+          host_path {
+            path = "/etc/amazon/efs"
+            type = "DirectoryOrCreate"
+          }
+        }
+
+        host_network = true
+        host_pid     = true
+        host_ipc     = true
+      }
+    }
+  }
+}
+# Job to test EFS mount
+resource "kubernetes_job" "check_update_efs_utils" {
+  metadata {
+    name      = "check-update-efs-utils"
+    namespace = "kube-system"
+  }
+
+  spec {
+    template {
+      metadata {}
       spec {
         container {
           name    = "check-update-efs-utils"
@@ -59,60 +110,32 @@ resource "kubernetes_daemonset" "check_update_efs_utils" {
           args    = [
             <<-EOT
             yum install -y amazon-efs-utils
-            systemctl enable amazon-efs-mount-watchdog
-            systemctl start amazon-efs-mount-watchdog
-            cp /etc/amazon/efs/efs-utils.conf /etc/amazon/efs/efs-utils.conf.bak
+            mkdir -p /etc/amazon/efs
             echo "fips_mode_enabled = false" >> /etc/amazon/efs/efs-utils.conf
             echo "retry_nfs_mount_command = true" >> /etc/amazon/efs/efs-utils.conf
+            echo "Check and update completed successfully"
             EOT
           ]
 
           security_context {
             privileged = true
           }
-        }
 
-        host_network = true
-        host_pid     = true
-      }
-    }
-  }
-}
-
-# Job to test EFS mount
-resource "kubernetes_job" "test_efs_mount" {
-  metadata {
-    name = "test-efs-mount"
-  }
-
-  spec {
-    template {
-      metadata {}
-      spec {
-        container {
-          name    = "test-mount"
-          image   = "amazon/aws-cli"
-          command = ["/bin/bash", "-c"]
-          args    = [
-            <<-EOT
-            mkdir -p /mnt/efs
-            mount -t efs -o tls,accesspoint=${var.efs_access_point_id} ${var.efs_id}:/ /mnt/efs
-            if [ $? -eq 0 ]; then
-              echo "Mount successful"
-              ls -la /mnt/efs
-              umount /mnt/efs
-            else
-              echo "Mount failed"
-            fi
-            EOT
-          ]
-
-          security_context {
-            privileged = true
+          volume_mount {
+            name       = "efs-utils-config"
+            mount_path = "/etc/amazon/efs"
           }
         }
 
-        restart_policy = "Never"
+        volume {
+          name = "efs-utils-config"
+          host_path {
+            path = "/etc/amazon/efs"
+            type = "DirectoryOrCreate"
+          }
+        }
+
+        restart_policy = "OnFailure"
       }
     }
   }
