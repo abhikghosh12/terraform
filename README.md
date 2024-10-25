@@ -3,6 +3,8 @@
 This repository contains Terraform configuration to deploy the Voice app on AWS EKS with external DNS support.
 
 [Architecture Overview](diagrams/aws.png)
+
+
 [App Architecture Overview](diagrams/sss1.png)
 
 
