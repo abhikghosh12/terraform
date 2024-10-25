@@ -93,21 +93,18 @@ terraform destroy
 
 ## Connect & Contribute
 
-🌟 Star this repository if you find it helpful
-🔗 Follow on LinkedIn for updates
-💬 Join our Discord Community
-📝 Check out my Blog Posts
+- 🌟 Star this repository if you find it helpful
+- 🔗 Follow on [LinkedIn](https://www.linkedin.com/in/abhik-ghosh-msc/) for updates
+- 💬 Join our [My website](https://abhikghosh87.wixsite.com/website)
+- 📝 Check out my [Blog Posts](https://medium.com/@abhikghosh_46536)
 
-## Support
+## Support the Project
 
-For any questions or issues, please open an issue in this repository.
-
-Support the Project
 If you find this project helpful, consider supporting its development:
 
-💖 PayPal: paypal.me/abhikghosh87
-⭐ Star this repository
-📣 Share with others
+- 💖 PayPal: [paypal.me/abhikghosh87](https://paypal.me/abhikghosh87)
+- ⭐ Star this repository
+- 📣 Share with others
 
-
+---
 Made with ❤️ by the community. Special thanks to all our supporters!
